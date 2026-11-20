@@ -51,5 +51,6 @@ local values; never commit `.env`.
 
 ## Status
 
-Phase 1: domain (pricing, wallet, ledger, reservations), PostgreSQL schema and the first
-migration. See `docs/adr/` for decisions taken.
+Phase 2: console authentication — signup, verification, login, server-side sessions, CSRF,
+mandatory TOTP with recovery codes, password reset, throttling. The console currently runs
+against an in-memory store; the PostgreSQL adapter lands in Phase 3. See `docs/adr/`.
