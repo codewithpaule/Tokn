@@ -7,12 +7,14 @@ pytest packages/infra/tests/test_integration_postgres.py``.
 
 from __future__ import annotations
 
-import asyncio
 import os
 from datetime import UTC, datetime, timedelta
 
 import pytest
+import pytest_asyncio
 from sqlalchemy import text
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.pool import NullPool
 
 from tokn_core.api_keys import KeyRecord, generate_key
 from tokn_core.auth.throttle import ThrottleState
@@ -21,15 +23,15 @@ from tokn_core.errors import AccountExistsError
 from tokn_infra.memory.key_store import InMemoryKeyCache
 from tokn_infra.postgres.auth_store import PostgresAuthStore
 from tokn_infra.postgres.key_store import PostgresKeyStore
-from tokn_infra.postgres.session import create_engine, create_session_factory
 
 DATABASE_URL = os.environ.get("TOKN_TEST_DATABASE_URL")
 PEPPER = "integration-pepper-not-a-real-secret"
 NOW = datetime(2026, 11, 20, 12, 0, tzinfo=UTC)
 
-pytestmark = pytest.mark.skipif(
-    not DATABASE_URL, reason="set TOKN_TEST_DATABASE_URL to run integration tests"
-)
+pytestmark = [
+    pytest.mark.skipif(not DATABASE_URL, reason="set TOKN_TEST_DATABASE_URL to run integration tests"),
+    pytest.mark.asyncio(loop_scope="module"),
+]
 
 
 class MemoryThrottle:
@@ -43,23 +45,27 @@ class MemoryThrottle:
         self._states[identity] = state
 
 
-@pytest.fixture(scope="module")
-def factory():
+@pytest_asyncio.fixture(scope="module", loop_scope="module")
+async def factory():
+    """One engine, one event loop for the whole module.
+
+    A pooled connection is bound to the loop that created it, so the tests and the
+    fixture must share a loop (hence loop_scope="module" above) or asyncpg will hand back
+    connections from a dead loop.
+    """
     assert DATABASE_URL is not None
-    engine = create_engine(DATABASE_URL)
-
-    async def reset() -> None:
-        async with engine.begin() as connection:
-            await connection.execute(
-                text(
-                    "TRUNCATE recovery_codes, auth_tokens, sessions, ledger_entries, "
-                    "reservations, usage_events, api_keys, wallets, accounts CASCADE"
-                )
+    engine = create_async_engine(DATABASE_URL, pool_size=2, max_overflow=0, pool_pre_ping=True)
+    async with engine.begin() as connection:
+        await connection.execute(
+            text(
+                "TRUNCATE recovery_codes, auth_tokens, sessions, ledger_entries, "
+                "reservations, usage_events, api_keys, wallets, accounts CASCADE"
             )
+        )
+    try:
+        yield async_sessionmaker(engine, expire_on_commit=False)
+    finally:
         await engine.dispose()
-
-    asyncio.run(reset())
-    return create_session_factory(engine)
 
 
 @pytest.fixture
@@ -97,7 +103,9 @@ async def test_verifying_activates_the_account(auth_store) -> None:
 
 async def test_a_token_is_consumed_exactly_once(auth_store) -> None:
     account = await auth_store.create_account("token@tokn.ng", "hashed")
-    await auth_store.issue_token(account.id, "digest-1", TokenKind.PASSWORD_RESET, NOW)
+    await auth_store.issue_token(
+        account.id, "digest-1", TokenKind.PASSWORD_RESET, NOW + timedelta(minutes=30)
+    )
 
     assert await auth_store.consume_token("digest-1", TokenKind.PASSWORD_RESET, NOW) == account.id
     assert await auth_store.consume_token("digest-1", TokenKind.PASSWORD_RESET, NOW) is None
