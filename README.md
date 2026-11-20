@@ -57,8 +57,9 @@ it — including one that fires twenty simultaneous reservations at a balance th
 and asserts exactly ten succeed and the balance lands on zero.
 
 What is still unproven: no request has reached a real model provider (adapters are tested
-against a mocked transport), no Redis is attached, and the services are not yet wired to
-the PostgreSQL adapters because the email outbox arrives in Phase 5.
+against a mocked transport), no Redis is attached, and the gateway is not yet wired to
+PostgreSQL — the console is, and a real signup against Neon writes both the account and
+its queued verification email.
 
 ```
 uv run alembic upgrade head                     # needs TOKN_DATABASE_URL
