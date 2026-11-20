@@ -1,0 +1,63 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: lint, types, tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6
+        with:
+          enable-cache: true
+
+      - name: Install Python
+        run: uv python install 3.12
+
+      - name: Sync workspace
+        run: uv sync --locked --all-packages
+
+      - name: Format
+        run: uv run ruff format --check .
+
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Types
+        run: uv run mypy
+
+      - name: Tests
+        run: uv run pytest --cov --cov-report=term-missing --cov-fail-under=85
+
+  secrets:
+    name: secret scan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out full history
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Scan for secrets
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
