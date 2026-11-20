@@ -24,6 +24,10 @@ class Settings(BaseSettings):
     secure_cookies: bool = True
     enforce_https: bool = False
 
+    # When set, the console runs on PostgreSQL instead of the in-memory store.
+    database_url: str | None = None
+    database_pool_size: int = 5
+
     def validated(self) -> Settings:
         """Fail fast rather than serve auth with a placeholder secret in production."""
         if self.env != "development":

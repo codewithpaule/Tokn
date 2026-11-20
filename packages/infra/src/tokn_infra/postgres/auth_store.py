@@ -21,7 +21,7 @@ from tokn_core.auth.store import AccountRecord, SessionRecord, ThrottleStore
 from tokn_core.auth.throttle import ThrottleState
 from tokn_core.auth.tokens import TokenKind
 from tokn_core.errors import AccountExistsError
-from tokn_infra.db.models import Account, AuthSession, AuthToken, RecoveryCode
+from tokn_infra.db.models import Account, AuthSession, AuthToken, EmailOutbox, RecoveryCode
 from tokn_infra.postgres.session import SessionFactory
 
 
@@ -196,7 +196,9 @@ class PostgresAuthStore:
         await self._throttle.save_throttle(identity, state)
 
     async def enqueue_email(self, to: str, subject: str, body: str) -> None:
-        raise NotImplementedError("the email outbox arrives with Phase 5")
+        """Queue mail in the caller's transaction; a worker sends it later."""
+        async with self._sessions() as session, session.begin():
+            session.add(EmailOutbox(to_address=to, subject=subject, body=body))
 
 
 def _to_record(account: Account, recovery_digests: tuple[str, ...]) -> AccountRecord:
