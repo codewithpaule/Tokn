@@ -3,13 +3,16 @@
 The order is the design:
 
 1. Validate the request against the catalog.
-2. Reserve the worst case. If it does not fit, return 402 without touching upstream.
-3. Open the upstream stream. A failure here releases the hold and charges nothing.
+2. Reserve the worst case — the larger of the primary and fallback prices.
+3. Choose a provider: the primary if its breaker allows, otherwise the configured fallback.
 4. Stream to the client unbuffered, accumulating usage as events pass.
-5. Settle in a finally block, shielded, exactly once.
+5. Settle in a finally block, shielded, exactly once, against the entry that served it.
 
 A client that disconnects mid-answer still settles, because the provider generated those
 tokens and will bill us for them.
+
+The customer's ``model`` is an alias. It is rewritten to the upstream model id on the way
+out, which is also what makes a fallback a fallback rather than a second alias.
 """
 
 from __future__ import annotations
@@ -28,6 +31,7 @@ from fastapi.responses import StreamingResponse
 
 from tokn_core.api_keys import KeyRecord
 from tokn_core.auth.ports import Clock
+from tokn_core.circuit import CircuitBreaker
 from tokn_core.money import Naira
 from tokn_core.pricing import PriceSchedule, TokenUsage
 from tokn_core.streaming import SseSplitter, UsageAccumulator
@@ -81,6 +85,7 @@ class Proxy:
         catalogue: Catalogue,
         adapters: dict[str, ProviderAdapter],
         clock: Clock,
+        breakers: dict[str, CircuitBreaker] | None = None,
         new_id: Callable[[], str] | None = None,
     ) -> None:
         self._wallet = wallet
@@ -88,53 +93,104 @@ class Proxy:
         self._catalogue = catalogue
         self._adapters = adapters
         self._clock = clock
+        self._breakers = breakers or {}
         self._new_id = new_id or (lambda: uuid.uuid4().hex)
 
     async def respond(self, key: KeyRecord, payload: dict[str, object]) -> StreamingResponse:
         request_id = self._new_id()
-        entry = self._entry(payload)
-        max_out = self._max_tokens(payload, entry)
-        hold = entry.price.hold(self._estimate_input(payload), max_out)
+        primary = self._entry(payload)
+        max_out = self._max_tokens(payload, primary)
+        fallback = self._fallback(primary)
+        attemptable = [entry for entry in (primary, fallback) if entry is not None]
 
-        reserved = await self._wallet.reserve(
-            request_id=request_id, account_id=key.account_id, hold=hold
+        hold = max(
+            entry.price.hold(self._estimate_input(payload), max_out) for entry in attemptable
         )
-        if not reserved:
+        if not await self._wallet.reserve(
+            request_id=request_id, account_id=key.account_id, hold=hold
+        ):
             raise HTTPException(
                 status_code=status.HTTP_402_PAYMENT_REQUIRED,
                 detail="your wallet cannot cover this request. Top up to continue.",
             )
 
-        adapter = self._adapters.get(entry.provider)
-        if adapter is None:
-            await self._wallet.release(request_id=request_id)
-            raise HTTPException(status_code=503, detail="provider unavailable")
-
         started = self._clock.now()
-        try:
-            upstream = await adapter.open(payload)
-        except UpstreamError as error:
-            await self._wallet.release(request_id=request_id)
-            await self._record(
-                request_id,
-                key,
-                entry,
-                TokenUsage(0, 0),
-                Naira.zero(),
-                Naira.zero(),
-                started,
-                Outcome.UPSTREAM_ERROR,
-                False,
-            )
-            raise HTTPException(
-                status_code=502, detail="upstream failed before responding"
-            ) from error
+        served, upstream = await self._open(request_id, key, payload, attemptable, started)
+        if upstream is None or served is None:
+            raise HTTPException(status_code=502, detail="upstream failed before responding")
 
         return StreamingResponse(
-            self._relay(request_id, key, entry, upstream, hold, started),
+            self._relay(request_id, key, served, upstream, hold, started),
             media_type="text/event-stream",
             headers={"x-request-id": request_id, "cache-control": "no-store"},
         )
+
+    # -- choosing a provider ----------------------------------------------
+
+    def _usable(self, entry: CatalogueEntry, now: datetime) -> bool:
+        breaker = self._breakers.get(entry.provider)
+        return True if breaker is None else breaker.allows(now)
+
+    def _record(self, entry: CatalogueEntry, *, ok: bool, now: datetime) -> None:
+        breaker = self._breakers.get(entry.provider)
+        if breaker is None:
+            return
+        if ok:
+            breaker.record_success()
+        else:
+            breaker.record_failure(now)
+
+    async def _open(
+        self,
+        request_id: str,
+        key: KeyRecord,
+        payload: dict[str, object],
+        candidates: list[CatalogueEntry],
+        started: datetime,
+    ) -> tuple[CatalogueEntry | None, httpx.Response | None]:
+        now = self._clock.now()
+        attempted_any = False
+        last_error: UpstreamError | None = None
+
+        for entry in candidates:
+            if not self._usable(entry, now):
+                continue
+            adapter = self._adapters.get(entry.provider)
+            if adapter is None:
+                continue
+            attempted_any = True
+            body = {**payload, "model": entry.upstream_model}
+            try:
+                return entry, await adapter.open(body)
+            except UpstreamError as error:
+                last_error = error
+                self._record(entry, ok=False, now=now)
+
+        await self._wallet.release(request_id=request_id)
+        await self._emit(
+            request_id,
+            key,
+            candidates[0],
+            TokenUsage(0, 0),
+            Naira.zero(),
+            Naira.zero(),
+            started,
+            Outcome.UPSTREAM_ERROR,
+            False,
+        )
+        if not attempted_any:
+            raise HTTPException(status_code=503, detail="no provider is currently available")
+        raise HTTPException(
+            status_code=502, detail="upstream failed before responding"
+        ) from last_error
+
+    def _fallback(self, primary: CatalogueEntry) -> CatalogueEntry | None:
+        if not primary.fallback_alias:
+            return None
+        candidate = self._catalogue.get(primary.fallback_alias)
+        if candidate is None or candidate.alias == primary.alias:
+            return None
+        return candidate
 
     # -- request validation ------------------------------------------------
 
@@ -199,6 +255,7 @@ class Proxy:
                     )
                 )
             )
+            self._record(entry, ok=outcome is not Outcome.STREAM_ERROR, now=self._clock.now())
             await upstream.aclose()
 
     async def _settle(
@@ -226,7 +283,7 @@ class Proxy:
             flagged = True
 
         await self._wallet.settle(request_id=request_id, charge=charge)
-        await self._record(
+        await self._emit(
             request_id,
             key,
             entry,
@@ -238,7 +295,7 @@ class Proxy:
             flagged,
         )
 
-    async def _record(
+    async def _emit(
         self,
         request_id: str,
         key: KeyRecord,
@@ -271,7 +328,7 @@ class Proxy:
 
 
 def build_router(proxy: Proxy, auth: GatewayAuth) -> APIRouter:
-    """The two model endpoints. Bodies are passed through unchanged."""
+    """The two model endpoints. Bodies are passed through, with the model rewritten."""
     router = APIRouter()
 
     @router.post("/v1/chat/completions")

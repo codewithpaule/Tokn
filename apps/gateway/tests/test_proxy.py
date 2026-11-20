@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 import httpx
 from fastapi import FastAPI
@@ -173,7 +173,8 @@ async def test_a_request_is_streamed_and_charged_for_real_usage() -> None:
     assert sink.events[0].outcome is Outcome.OK
     assert sink.events[0].usage == usage
     assert sink.events[0].flagged_for_review is False
-    assert adapter.payloads[0]["model"] == "test-model"
+    assert sink.events[0].model_alias == "test-model"
+    assert adapter.payloads[0]["model"] == "upstream-1", "the alias is rewritten upstream"
 
 
 async def test_the_hold_covers_the_worst_case_before_upstream_is_called() -> None:
@@ -282,3 +283,138 @@ async def test_the_charge_never_exceeds_the_hold() -> None:
 
     assert wallet.settled[0][1].micro <= hold.micro
     assert sink.events[0].flagged_for_review is True
+
+
+# -- fallback and circuit breaking ---------------------------------------
+
+BACKUP_PRICE = PriceSchedule(
+    input_per_million=Naira(3_000_000), output_per_million=Naira(6_000_000), markup_bps=0
+)
+BACKUP = CatalogueEntry(
+    alias="backup-model",
+    upstream_model="backup-upstream",
+    provider="backup",
+    protocol="openai",
+    price=BACKUP_PRICE,
+    max_output_tokens=4096,
+)
+FALLBACK_ENTRY = CatalogueEntry(
+    alias="test-model",
+    upstream_model="upstream-1",
+    provider="fake",
+    protocol="openai",
+    price=PRICE,
+    max_output_tokens=4096,
+    fallback_alias="backup-model",
+)
+
+
+def build_fallback(
+    *, primary_error: UpstreamError | None = None
+) -> tuple[FastAPI, Proxy, FakeWallet, FakeSink, FakeAdapter, FakeAdapter, dict]:
+    from tokn_core.circuit import CircuitBreaker
+
+    wallet = FakeWallet(10_000_000)
+    sink = FakeSink()
+    primary = FakeAdapter(error=primary_error)
+    backup = FakeAdapter()
+    breakers = {
+        "fake": CircuitBreaker(failure_threshold=1, reset_timeout=timedelta(seconds=30)),
+        "backup": CircuitBreaker(failure_threshold=1, reset_timeout=timedelta(seconds=30)),
+    }
+    proxy = Proxy(
+        wallet=wallet,
+        usage_sink=sink,
+        catalogue=FakeCatalogue([FALLBACK_ENTRY, BACKUP]),
+        adapters={"fake": primary, "backup": backup},
+        clock=FrozenClock(),
+        breakers=breakers,
+        new_id=lambda: "req_1",
+    )
+
+    async def fake_auth() -> KeyRecord:
+        return KEY
+
+    app = FastAPI(docs_url=None, openapi_url=None)
+    app.include_router(build_router(proxy, fake_auth))
+    return app, proxy, wallet, sink, primary, backup, breakers
+
+
+async def test_an_open_breaker_routes_to_the_configured_fallback() -> None:
+    app, _, wallet, sink, primary, backup, breakers = build_fallback()
+    breakers["fake"].record_failure(NOW)  # threshold is 1, so this opens it
+
+    response = await call(
+        app,
+        {
+            "model": "test-model",
+            "messages": [{"role": "user", "content": "x" * 300}],
+            "max_tokens": 64,
+        },
+    )
+
+    assert response.status_code == 200
+    assert primary.payloads == [], "the open provider must not be called"
+    assert backup.payloads[0]["model"] == "backup-upstream", "the model id is rewritten"
+    event = sink.events[0]
+    assert event.provider == "backup"
+    assert event.model_alias == "backup-model"
+    assert wallet.settled[0][1] == BACKUP_PRICE.charge(event.usage)
+
+
+async def test_a_failure_before_the_first_byte_falls_back() -> None:
+    app, _, _, sink, primary, backup, _ = build_fallback(
+        primary_error=UpstreamError(503, "overloaded")
+    )
+
+    response = await call(app, {"model": "test-model", "messages": [], "max_tokens": 64})
+
+    assert response.status_code == 200
+    assert primary.payloads, "the primary was tried first"
+    assert backup.payloads, "and the fallback answered"
+    assert sink.events[0].provider == "backup"
+
+
+async def test_the_hold_covers_the_more_expensive_of_the_two_prices() -> None:
+    app, _, wallet, _, _, _, _ = build_fallback()
+    await call(app, {"model": "test-model", "messages": [], "max_tokens": 64})
+
+    _, hold = wallet.reserved[0]
+    cheapest = PRICE.hold(1, 64)
+    dearest = BACKUP_PRICE.hold(1, 64)
+    assert hold.micro == max(cheapest.micro, dearest.micro)
+
+
+async def test_no_provider_at_all_is_a_503_and_the_hold_comes_back() -> None:
+    from tokn_core.circuit import CircuitBreaker
+
+    wallet = FakeWallet(10_000_000)
+    sink = FakeSink()
+    breakers = {
+        "fake": CircuitBreaker(failure_threshold=1, reset_timeout=timedelta(seconds=30)),
+        "backup": CircuitBreaker(failure_threshold=1, reset_timeout=timedelta(seconds=30)),
+    }
+    breakers["fake"].record_failure(NOW)
+    breakers["backup"].record_failure(NOW)
+
+    proxy = Proxy(
+        wallet=wallet,
+        usage_sink=sink,
+        catalogue=FakeCatalogue([FALLBACK_ENTRY, BACKUP]),
+        adapters={"fake": FakeAdapter(), "backup": FakeAdapter()},
+        clock=FrozenClock(),
+        breakers=breakers,
+        new_id=lambda: "req_1",
+    )
+
+    async def fake_auth() -> KeyRecord:
+        return KEY
+
+    app = FastAPI(docs_url=None, openapi_url=None)
+    app.include_router(build_router(proxy, fake_auth))
+
+    response = await call(app, {"model": "test-model", "messages": [], "max_tokens": 64})
+
+    assert response.status_code == 503
+    assert wallet.balance.micro == 10_000_000
+    assert wallet.settled == []

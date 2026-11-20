@@ -40,6 +40,14 @@ away, and we do not invent a precise number we cannot defend.
 `client_disconnect` and still settle, because the provider generated those tokens and will
 bill us for them.
 
+**Fallback is explicit, never silent.** A model may name one `fallback_alias` in the
+catalog. It is used only when the primary's circuit breaker is open, or when the primary
+fails before the first byte — never after content has reached the customer, because
+splicing two answers together would be worse than an error. The fallback is a different
+model the operator deliberately paired with this one, and the receipt records which model
+actually served the request. The hold covers the more expensive of the two prices, so a
+fallback can never produce a charge above the reservation.
+
 ## Consequences
 
 - The gateway can run out of "reserved" money but never out of real money.
