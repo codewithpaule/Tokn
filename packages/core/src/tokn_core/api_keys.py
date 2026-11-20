@@ -52,6 +52,8 @@ class KeyRecord:
     ip_allowlist: tuple[str, ...] | None = None
     auto_paused: bool = False
     concurrency_limit: int = 8
+    name: str = ""
+    last_used_at: datetime | None = None
 
     def is_usable(self, now: datetime) -> bool:
         """Cheap checks that need no request context. All failures look identical."""

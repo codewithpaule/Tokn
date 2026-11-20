@@ -41,8 +41,16 @@ class SessionRecord:
     last_seen_at: datetime
 
 
+class ThrottleStore(Protocol):
+    """Ephemeral counters. Losing them costs a burst of attempts, never money."""
+
+    async def throttle(self, identity: str) -> ThrottleState: ...
+
+    async def save_throttle(self, identity: str, state: ThrottleState) -> None: ...
+
+
 class AuthStore(Protocol):
-    """Everything the auth use cases need from storage."""
+    """Everything the auth use cases need from durable storage."""
 
     async def create_account(self, email: str, password_hash: str) -> AccountRecord:
         """Insert a pending account. Raises if the email is already registered."""
