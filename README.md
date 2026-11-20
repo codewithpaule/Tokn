@@ -51,4 +51,5 @@ local values; never commit `.env`.
 
 ## Status
 
-Phase 0: repository scaffold, tooling and CI. See `docs/adr/` for decisions taken.
+Phase 1: domain (pricing, wallet, ledger, reservations), PostgreSQL schema and the first
+migration. See `docs/adr/` for decisions taken.
