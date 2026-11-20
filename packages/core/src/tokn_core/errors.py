@@ -34,3 +34,11 @@ class InvariantViolationError(DomainError):
 
 class UnknownReservationError(DomainError):
     """A request id has no reservation, so there is nothing to settle."""
+
+
+class AccountExistsError(DomainError):
+    """An account with that email is already registered."""
+
+
+class AuthenticationFailedError(DomainError):
+    """Credentials did not match. Deliberately carries no detail about why."""
