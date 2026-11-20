@@ -51,10 +51,10 @@ local values; never commit `.env`.
 
 ## Status
 
-Phase 3: API key format and rules, constant-time key authentication with a 30-second
-cache, instant revocation, token-bucket rate limits, concurrency caps, gateway auth
-middleware, and key issuance in the console behind a step-up code.
+Phase 4: provider adapters over httpx with a host allowlist and no redirects, SSE usage
+extraction for both protocols, per-provider circuit breaker, and the reserve/stream/settle
+proxy with a hold that is a hard ceiling.
 
-PostgreSQL and Redis adapters are written; they have **not** been run against a live
-server, and the services still default to in-memory adapters. Nine integration tests ship
-with them and skip until `TOKN_TEST_DATABASE_URL` is set. See `docs/adr/`.
+The proxy is complete and tested against a mocked transport; it is **not yet mounted** in
+the gateway app because it needs the PostgreSQL wallet store, which has never run against
+a live database. Persistence remains the one unverified layer — see the note below.
