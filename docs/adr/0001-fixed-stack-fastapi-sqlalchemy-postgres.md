@@ -35,5 +35,10 @@ toolchain and no runtime CDN.
   section and covered by tests, which is the point — we need to prove those behaviours.
 - The console renders HTML on the server, so there is no client build step, no hydration
   cost and no JavaScript supply chain beyond two vendored, hash-pinned files.
+- Runtime is plain `uvicorn`, not `uvicorn[standard]`. The extra pulls `websockets`,
+  `watchfiles` and `httptools`; the gateway speaks HTTP only, and added latency in this
+  service is dominated by upstream model time, not by request parsing. If the Phase 8
+  load test shows event-loop cost mattering, we add `uvloop` on its own with the
+  benchmark that justified it.
 - Revisit if the console's UI complexity outgrows htmx. That would be a new ADR, not a
   silent rewrite.
