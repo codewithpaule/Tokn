@@ -21,7 +21,6 @@ import asyncio
 import math
 import uuid
 from collections.abc import AsyncIterator, Callable
-from dataclasses import dataclass
 from datetime import datetime
 from typing import Protocol
 
@@ -31,9 +30,11 @@ from fastapi.responses import StreamingResponse
 
 from tokn_core.api_keys import KeyRecord
 from tokn_core.auth.ports import Clock
+from tokn_core.catalogue import Catalogue, CatalogueEntry
 from tokn_core.circuit import CircuitBreaker
+from tokn_core.key_auth import KeyStore
 from tokn_core.money import Naira
-from tokn_core.pricing import PriceSchedule, TokenUsage
+from tokn_core.pricing import TokenUsage
 from tokn_core.streaming import SseSplitter, UsageAccumulator
 from tokn_core.usage import Outcome, UsageEvent
 from tokn_gateway.auth import GatewayAuth
@@ -41,28 +42,23 @@ from tokn_gateway.providers import ProviderAdapter, UpstreamError
 
 CHARS_PER_TOKEN = 3  # deliberately conservative: over-estimates, never under
 
-
-@dataclass(frozen=True, slots=True)
-class CatalogueEntry:
-    alias: str
-    upstream_model: str
-    provider: str
-    protocol: str
-    price: PriceSchedule
-    max_output_tokens: int
-    fallback_alias: str | None = None
-
-
-class Catalogue(Protocol):
-    def get(self, alias: str) -> CatalogueEntry | None: ...
+__all__ = [
+    "Catalogue",
+    "CatalogueEntry",
+    "Proxy",
+    "UsageSink",
+    "WalletStore",
+    "build_router",
+    "estimate_tokens",
+]
 
 
 class WalletStore(Protocol):
     async def reserve(self, *, request_id: str, account_id: str, key_id: str, hold: Naira) -> bool:
         """Atomically hold credit. False means the balance cannot cover it."""
 
-    async def settle(self, *, request_id: str, charge: Naira) -> None:
-        """Charge and release the remainder. Idempotent on request_id."""
+    async def settle(self, *, request_id: str, charge: Naira) -> Naira:
+        """Charge and release the remainder. Idempotent on request_id; returns the charge."""
 
     async def release(self, *, request_id: str) -> None:
         """Give the whole hold back. Idempotent on request_id."""
@@ -86,6 +82,7 @@ class Proxy:
         adapters: dict[str, ProviderAdapter],
         clock: Clock,
         breakers: dict[str, CircuitBreaker] | None = None,
+        key_store: KeyStore | None = None,
         new_id: Callable[[], str] | None = None,
     ) -> None:
         self._wallet = wallet
@@ -94,13 +91,14 @@ class Proxy:
         self._adapters = adapters
         self._clock = clock
         self._breakers = breakers or {}
+        self._key_store = key_store
         self._new_id = new_id or (lambda: uuid.uuid4().hex)
 
     async def respond(self, key: KeyRecord, payload: dict[str, object]) -> StreamingResponse:
         request_id = self._new_id()
-        primary = self._entry(payload)
+        primary = await self._entry(payload)
         max_out = self._max_tokens(payload, primary)
-        fallback = self._fallback(primary)
+        fallback = await self._fallback(primary)
         attemptable = [entry for entry in (primary, fallback) if entry is not None]
 
         hold = max(
@@ -184,19 +182,19 @@ class Proxy:
             status_code=502, detail="upstream failed before responding"
         ) from last_error
 
-    def _fallback(self, primary: CatalogueEntry) -> CatalogueEntry | None:
+    async def _fallback(self, primary: CatalogueEntry) -> CatalogueEntry | None:
         if not primary.fallback_alias:
             return None
-        candidate = self._catalogue.get(primary.fallback_alias)
+        candidate = await self._catalogue.get(primary.fallback_alias)
         if candidate is None or candidate.alias == primary.alias:
             return None
         return candidate
 
     # -- request validation ------------------------------------------------
 
-    def _entry(self, payload: dict[str, object]) -> CatalogueEntry:
+    async def _entry(self, payload: dict[str, object]) -> CatalogueEntry:
         alias = payload.get("model")
-        entry = self._catalogue.get(alias) if isinstance(alias, str) else None
+        entry = await self._catalogue.get(alias) if isinstance(alias, str) else None
         if entry is None:
             raise HTTPException(status_code=404, detail="unknown model")
         return entry
@@ -283,6 +281,9 @@ class Proxy:
             flagged = True
 
         await self._wallet.settle(request_id=request_id, charge=charge)
+        if self._key_store is not None and charge.micro:
+            await self._key_store.record_spend(key.id, charge.micro)
+            await self._key_store.touch_last_used(key.id, self._clock.now())
         await self._emit(
             request_id,
             key,

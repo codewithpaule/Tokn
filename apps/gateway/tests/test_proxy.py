@@ -65,12 +65,13 @@ class FakeWallet:
         self.reserved.append((request_id, hold))
         return True
 
-    async def settle(self, *, request_id: str, charge: Naira) -> None:
+    async def settle(self, *, request_id: str, charge: Naira) -> Naira:
         if request_id in {rid for rid, _ in self.settled}:
-            return
+            return charge
         hold = self.holds.pop(request_id, Naira.zero())
         self.balance = self.balance + (hold - charge)
         self.settled.append((request_id, charge))
+        return charge
 
     async def release(self, *, request_id: str) -> None:
         if request_id in {rid for rid, _ in self.settled}:
@@ -92,7 +93,7 @@ class FakeCatalogue:
     def __init__(self, entries: list[CatalogueEntry]) -> None:
         self._entries = {entry.alias: entry for entry in entries}
 
-    def get(self, alias: str) -> CatalogueEntry | None:
+    async def get(self, alias: str) -> CatalogueEntry | None:
         return self._entries.get(alias)
 
 
