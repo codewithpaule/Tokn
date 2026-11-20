@@ -51,6 +51,10 @@ local values; never commit `.env`.
 
 ## Status
 
-Phase 2: console authentication — signup, verification, login, server-side sessions, CSRF,
-mandatory TOTP with recovery codes, password reset, throttling. The console currently runs
-against an in-memory store; the PostgreSQL adapter lands in Phase 3. See `docs/adr/`.
+Phase 3: API key format and rules, constant-time key authentication with a 30-second
+cache, instant revocation, token-bucket rate limits, concurrency caps, gateway auth
+middleware, and key issuance in the console behind a step-up code.
+
+PostgreSQL and Redis adapters are written; they have **not** been run against a live
+server, and the services still default to in-memory adapters. Nine integration tests ship
+with them and skip until `TOKN_TEST_DATABASE_URL` is set. See `docs/adr/`.
