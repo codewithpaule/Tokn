@@ -51,10 +51,16 @@ local values; never commit `.env`.
 
 ## Status
 
-Phase 4: provider adapters over httpx with a host allowlist and no redirects, SSE usage
-extraction for both protocols, per-provider circuit breaker, and the reserve/stream/settle
-proxy with a hold that is a hard ceiling.
+Phases 0–4 are code-complete. The persistence layer is now **verified**: migrations
+0001–0003 applied to PostgreSQL 18.7 (Neon), and seventeen integration tests run against
+it — including one that fires twenty simultaneous reservations at a balance that fits ten
+and asserts exactly ten succeed and the balance lands on zero.
 
-The proxy is complete and tested against a mocked transport; it is **not yet mounted** in
-the gateway app because it needs the PostgreSQL wallet store, which has never run against
-a live database. Persistence remains the one unverified layer — see the note below.
+What is still unproven: no request has reached a real model provider (adapters are tested
+against a mocked transport), no Redis is attached, and the services are not yet wired to
+the PostgreSQL adapters because the email outbox arrives in Phase 5.
+
+```
+uv run alembic upgrade head                     # needs TOKN_DATABASE_URL
+TOKN_TEST_DATABASE_URL=... uv run pytest        # runs the integration tests too
+```
