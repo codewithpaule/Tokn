@@ -98,7 +98,41 @@ a { color: var(--green); }
 a:hover { color: var(--green-deep); }
 
 .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 14px; }
-.secret { background: var(--green-tint); padding: 12px 16px; border-radius: var(--radius); }
+.secret { background: var(--green-tint); padding: 12px 16px; border-radius: var(--radius); word-break: break-all; }
+
+h2 {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  margin: 40px 0 8px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 24px 0;
+  font-size: 15px;
+}
+
+th {
+  text-align: left;
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--muted);
+  padding: 8px 12px 8px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+td {
+  padding: 12px 12px 12px 0;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+
+td:last-child, th:last-child { padding-right: 0; }
+
+/* Long unbroken strings (otpauth URIs, keys) must wrap rather than scroll the page. */
+.hint .mono, .secret, p .mono { word-break: break-all; }
 
 .codes { list-style: none; padding: 0; }
 .codes li { padding: 6px 0; }
