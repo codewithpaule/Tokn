@@ -1,0 +1,108 @@
+/* Minimal console styles for the auth screens. Phase 6 replaces this with the full
+   design system; the palette and type scale are already the real ones. */
+
+:root {
+  --ink: #0e1210;
+  --paper: #fbfbf8;
+  --surface: #ffffff;
+  --line: #e3e6e0;
+  --muted: #5a625d;
+  --green: #1e6b4b;
+  --green-deep: #154d36;
+  --green-tint: #e7f0ea;
+  --danger: #a33a2c;
+  --radius: 12px;
+  --radius-control: 8px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.shell {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 48px 24px;
+}
+
+h1 {
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+  margin: 0 0 8px;
+}
+
+.muted { color: var(--muted); margin-top: 0; }
+
+form { margin-top: 24px; }
+
+label {
+  display: block;
+  font-size: 15px;
+  font-weight: 500;
+  margin: 16px 0 6px;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  font: inherit;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  min-height: 44px;
+}
+
+input:focus-visible,
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+}
+
+button {
+  margin-top: 24px;
+  min-height: 44px;
+  padding: 12px 20px;
+  font: inherit;
+  font-weight: 500;
+  border-radius: var(--radius-control);
+  border: 1px solid var(--green);
+  cursor: pointer;
+}
+
+button.primary { background: var(--green); color: var(--paper); }
+button.primary:hover { background: var(--green-deep); }
+button.quiet { background: transparent; color: var(--ink); border-color: var(--line); }
+
+.error {
+  background: #f7e9e6;
+  color: var(--danger);
+  border: 1px solid #e8c9c2;
+  border-radius: var(--radius-control);
+  padding: 12px 16px;
+}
+
+.hint { color: var(--muted); font-size: 13px; }
+
+a { color: var(--green); }
+a:hover { color: var(--green-deep); }
+
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 14px; }
+.secret { background: var(--green-tint); padding: 12px 16px; border-radius: var(--radius); }
+
+.codes { list-style: none; padding: 0; }
+.codes li { padding: 6px 0; }
+
+.facts { margin: 24px 0; }
+.facts dt { font-size: 13px; color: var(--muted); margin-top: 16px; }
+.facts dd { margin: 2px 0 0; }

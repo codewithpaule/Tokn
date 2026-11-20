@@ -4,25 +4,6 @@ Accounts, sessions, API keys, billing and admin. Server-rendered HTML only. It n
 proxies model traffic.
 """
 
-from __future__ import annotations
+from tokn_console.app import create_app
 
-from fastapi import FastAPI
-
-
-def create_app() -> FastAPI:
-    """Build the console application."""
-    app = FastAPI(
-        title="Tokn Console",
-        docs_url=None,
-        redoc_url=None,
-        openapi_url=None,
-    )
-
-    @app.get("/healthz")
-    async def healthz() -> dict[str, str]:
-        return {"status": "ok"}
-
-    return app
-
-
-app = create_app()
+__all__ = ["create_app"]

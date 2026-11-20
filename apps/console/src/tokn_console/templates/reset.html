@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Reset your password — {{ product }}{% endblock %}
+{% block content %}
+  <h1>Reset your password</h1>
+  <p class="muted">We will email a link that works once, for 30 minutes.</p>
+
+  <form method="post" action="/reset" novalidate>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label for="email">Email</label>
+    <input id="email" name="email" type="email" autocomplete="username" required>
+    <button type="submit" class="primary">Send link</button>
+  </form>
+{% endblock %}
