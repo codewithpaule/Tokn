@@ -4,16 +4,16 @@
   <h1>API keys</h1>
   <p class="muted">A key works with every model in the catalog. The secret is shown once.</p>
 
-  {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+  {% if error %}<p class="banner banner--error" role="alert">{{ error }}</p>{% endif %}
 
   {% if not enrolled %}
-    <p class="error" role="alert">
+    <p class="banner banner--error" role="alert">
       Set up two-factor authentication before creating a key.
       <a href="/app/2fa">Set it up</a>.
     </p>
   {% endif %}
 
-  <table class="keys">
+  <table class="table">
     <thead>
       <tr><th>Name</th><th>Key</th><th>Status</th></tr>
     </thead>
@@ -36,17 +36,17 @@
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
 
       <label for="name">Name</label>
-      <input id="name" name="name" type="text" placeholder="laptop" required>
+      <input class="input" id="name" name="name" type="text" placeholder="laptop" required>
 
       <label for="spend_cap_naira">Spend cap in naira (optional)</label>
-      <input id="spend_cap_naira" name="spend_cap_naira" type="text" inputmode="decimal"
+      <input class="input" id="spend_cap_naira" name="spend_cap_naira" type="text" inputmode="decimal"
              placeholder="5000">
 
       <label for="code">Authenticator code</label>
-      <input id="code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code"
+      <input class="input" id="code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code"
              pattern="[0-9]{6}" maxlength="6" required>
 
-      <button type="submit" class="primary">Create key</button>
+      <button type="submit" class="button button--primary">Create key</button>
     </form>
   {% endif %}
 

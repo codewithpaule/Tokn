@@ -62,6 +62,9 @@
 
 .field { margin-bottom: var(--s4); }
 
+/* Labels and inputs are styled by element as well as by class, so a template that
+   forgets a class still looks right rather than falling back to browser defaults. */
+label,
 .field label {
   display: block;
   font-size: var(--text-14);
@@ -69,7 +72,13 @@
   margin-bottom: var(--s2);
 }
 
-.input {
+.input,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+textarea,
+select {
   width: 100%;
   min-height: 44px;
   padding: var(--s3);
@@ -80,7 +89,10 @@
   border-radius: var(--radius-control);
 }
 
-.input:focus-visible {
+.input:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
   border-color: var(--green);
 }
 
