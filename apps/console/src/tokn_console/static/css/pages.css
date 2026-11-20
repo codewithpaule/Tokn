@@ -1,0 +1,56 @@
+/* Page-level layout. Used by a handful of pages, not by components. */
+
+.auth {
+  padding: var(--s8) 0;
+}
+
+.auth__card {
+  max-width: 420px;
+  margin: 0 auto;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: var(--s6);
+}
+
+@media (max-width: 480px) {
+  .auth__card {
+    border: 0;
+    background: transparent;
+    padding: 0;
+  }
+}
+
+.page {
+  padding: var(--s7) 0 var(--s8);
+}
+
+.page__intro {
+  max-width: 64ch;
+  margin-bottom: var(--s6);
+}
+
+.stack > * + * {
+  margin-top: var(--s4);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s3);
+}
+
+.code {
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: var(--radius);
+  padding: var(--s4);
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: var(--text-14);
+  line-height: 1.6;
+}
+
+.code__line { display: block; white-space: pre; }
+.code__prompt { color: #7fc8a2; user-select: none; }

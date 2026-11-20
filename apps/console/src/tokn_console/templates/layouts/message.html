@@ -1,6 +1,6 @@
-{% extends "base.html" %}
+{% extends "layouts/auth.html" %}
 {% block title %}{{ heading }} — {{ product }}{% endblock %}
-{% block content %}
+{% block card %}
   <h1>{{ heading }}</h1>
   <p class="muted">{{ body }}</p>
   <p><a href="/login">Back to sign in</a></p>

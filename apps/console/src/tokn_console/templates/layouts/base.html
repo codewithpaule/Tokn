@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}{{ product }}{% endblock %}</title>
+    <link rel="preload" href="/static/fonts/montserrat-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="{{ static_url('css/tokens.css') }}">
+    <link rel="stylesheet" href="{{ static_url('css/base.css') }}">
+    <link rel="stylesheet" href="{{ static_url('css/components.css') }}">
+    <link rel="stylesheet" href="{{ static_url('css/pages.css') }}">
+    <meta name="htmx-config" content='{"allowEval":false,"allowScriptTags":false,"selfRequestsOnly":true,"includeIndicatorStyles":false,"historyCacheSize":0,"timeout":15000}'>
+    {% block head %}{% endblock %}
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div id="progress" class="progress" data-active="false" aria-hidden="true"></div>
+
+    {% block nav %}{% endblock %}
+
+    <main id="main" class="{% block main_class %}{% endblock %}">
+      {% block content %}{% endblock %}
+    </main>
+
+    {% include "components/footer.html" %}
+    <div id="toasts" class="toasts" role="region" aria-label="Notifications"></div>
+
+    {% if flash %}
+      <div id="flash-data" hidden
+           data-kind="{{ flash.kind }}" data-message="{{ flash.message }}"></div>
+    {% endif %}
+
+    <script src="/static/vendor/htmx.min.js"
+            integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+"
+            crossorigin="anonymous" defer></script>
+    <script src="/static/vendor/alpine-csp.min.js"
+            integrity="sha384-ToFwPnlRgZIoDDSatKvWLkecUR4Py5dma633TT4TVBQfs4nHKXXexI3v72xi5LnC"
+            crossorigin="anonymous" defer></script>
+    <script src="{{ static_url('js/ui.js') }}" defer></script>
+    <script type="module" src="{{ static_url('js/net.js') }}"></script>
+  </body>
+</html>

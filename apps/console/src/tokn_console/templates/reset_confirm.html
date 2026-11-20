@@ -1,6 +1,6 @@
-{% extends "base.html" %}
+{% extends "layouts/auth.html" %}
 {% block title %}Choose a new password — {{ product }}{% endblock %}
-{% block content %}
+{% block card %}
   <h1>Choose a new password</h1>
 
   {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}

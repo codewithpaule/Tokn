@@ -1,0 +1,76 @@
+/* Design tokens. Everything else in the CSS references these. */
+
+@font-face {
+  font-family: "Montserrat";
+  src: url("/static/fonts/montserrat-latin.woff2") format("woff2-variations");
+  font-weight: 400 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* A metric-compatible fallback so the first paint is not visibly reflowed.
+   size-adjust is tuned against Montserrat's x-height. */
+@font-face {
+  font-family: "Montserrat Fallback";
+  src: local("Arial"), local("Helvetica"), local("Liberation Sans");
+  size-adjust: 100.3%;
+  ascent-override: 96.8%;
+  descent-override: 24.1%;
+  line-gap-override: 0%;
+}
+
+:root {
+  /* colour */
+  --ink: #0e1210;
+  --paper: #fbfbf8;
+  --surface: #ffffff;
+  --line: #e3e6e0;
+  --muted: #5a625d;
+  --green: #1e6b4b;
+  --green-deep: #154d36;
+  --green-tint: #e7f0ea;
+  --yellow: #e3b93c;
+  --yellow-tint: #faf3da;
+  --danger: #a33a2c;
+  --danger-tint: #f7e9e6;
+
+  /* spacing: 4px steps */
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 24px;
+  --s6: 32px;
+  --s7: 40px;
+  --s8: 56px;
+
+  /* type */
+  --text-13: 13px;
+  --text-14: 14px;
+  --text-16: 16px;
+  --text-20: 20px;
+  --text-28: 28px;
+  --text-40: 40px;
+
+  /* shape and motion */
+  --radius: 12px;
+  --radius-control: 8px;
+  --motion-fast: 120ms;
+  --motion-slow: 200ms;
+  --ease: cubic-bezier(0.2, 0.7, 0.3, 1);
+
+  /* layering */
+  --z-nav: 100;
+  --z-dialog: 200;
+  --z-toast: 300;
+
+  --font-sans: "Montserrat", "Montserrat Fallback", system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-fast: 0ms;
+    --motion-slow: 0ms;
+  }
+}

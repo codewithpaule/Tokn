@@ -7,6 +7,7 @@ with a ``__Host-`` cookie, which no subdomain can overwrite.
 
 from __future__ import annotations
 
+import uuid
 from datetime import datetime
 
 from fastapi import HTTPException, Request, Response, status
@@ -36,6 +37,17 @@ SECURITY_HEADERS = {
     "Cross-Origin-Resource-Policy": "same-origin",
     "X-Frame-Options": "DENY",
 }
+
+
+class RequestIdMiddleware(BaseHTTPMiddleware):
+    """Every response carries an id the customer can quote to support."""
+
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
+        request_id = request.headers.get("x-request-id") or uuid.uuid4().hex
+        request.state.request_id = request_id
+        response = await call_next(request)
+        response.headers.setdefault("x-request-id", request_id)
+        return response
 
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):

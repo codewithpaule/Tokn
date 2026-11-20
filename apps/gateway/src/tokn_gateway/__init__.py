@@ -12,6 +12,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from tokn_gateway.auth import GatewayAuth
+from tokn_gateway.limits import BodyLimitMiddleware
 from tokn_gateway.proxy import Proxy, build_router
 
 
@@ -45,6 +46,9 @@ def create_app(
 
     if proxy is not None and auth is not None:
         app.include_router(build_router(proxy, auth))
+
+    # Added last, so it is the outermost layer: a body is refused before anything parses it.
+    app.add_middleware(BodyLimitMiddleware)
 
     @app.get("/healthz")
     async def healthz() -> dict[str, str]:

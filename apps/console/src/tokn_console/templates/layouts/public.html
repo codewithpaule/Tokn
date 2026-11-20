@@ -1,0 +1,19 @@
+{% extends "layouts/base.html" %}
+
+{% block nav %}
+<header class="nav">
+  <div class="shell nav__inner">
+    <a class="nav__wordmark" href="/">{{ product }}</a>
+    <nav class="nav__links" aria-label="Main">
+      <a class="nav__link" href="/docs" {% if page == 'docs' %}aria-current="page"{% endif %}>Docs</a>
+      <a class="nav__link" href="/support" {% if page == 'support' %}aria-current="page"{% endif %}>Support</a>
+      {% if session %}
+        <a class="button button--outline" href="/app">Open console</a>
+      {% else %}
+        <a class="nav__link" href="/login">Log in</a>
+        <a class="button button--primary" href="/signup">Get API key</a>
+      {% endif %}
+    </nav>
+  </div>
+</header>
+{% endblock %}

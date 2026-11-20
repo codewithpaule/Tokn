@@ -15,18 +15,16 @@ from fastapi.responses import RedirectResponse
 from starlette.templating import Jinja2Templates
 
 from tokn_console.config import Settings
+from tokn_console.context import Console
 from tokn_console.web import (
-    CSRF_COOKIE,
     clear_session_cookie,
     client_ip,
     require_csrf,
-    set_session_cookie,
 )
 from tokn_core.api_keys import KeyRecord
-from tokn_core.auth.hashing import hash_secret, new_secret
+from tokn_core.auth.hashing import hash_secret
 from tokn_core.auth.passwords import WeakPasswordError, validate_password
 from tokn_core.auth.ports import Clock, PasswordHasher
-from tokn_core.auth.sessions import IDLE_TIMEOUT, new_session
 from tokn_core.auth.store import AccountRecord, AuthStore
 from tokn_core.auth.throttle import ThrottleState, is_over_limit
 from tokn_core.auth.tokens import TokenKind, issue_token, new_recovery_codes
@@ -62,59 +60,20 @@ def build_router(
     templates: Jinja2Templates,
 ) -> APIRouter:
     router = APIRouter()
-
-    def render(
-        request: Request, template: str, *, status_code: int = 200, **context: object
-    ) -> Response:
-        token = request.cookies.get(CSRF_COOKIE) or new_secret(32)
-        body = {**context, "csrf_token": token, "product": settings.product_name}
-        response = templates.TemplateResponse(request, template, body, status_code=status_code)
-        if request.cookies.get(CSRF_COOKIE) is None:
-            response.set_cookie(
-                CSRF_COOKIE, token, httponly=True, secure=True, samesite="lax", path="/"
-            )
-        return response
-
-    async def current_account(request: Request) -> AccountRecord | None:
-        session = getattr(request.state, "session", None)
-        if session is None:
-            return None
-        return await store.account_by_id(session.account_id)
-
-    async def start_session(request: Request, response: Response, account_id: str) -> None:
-        now = clock.now()
-        raw, _ = new_session(account_id, now, client_ip(request), request.headers.get("user-agent"))
-        await store.create_session(
-            hash_secret(raw, settings.session_secret),
-            account_id,
-            now,
-            client_ip(request),
-            request.headers.get("user-agent"),
-        )
-        previous = request.cookies.get("__Host-session")
-        if previous:
-            await store.delete_session(hash_secret(previous, settings.session_secret))
-        set_session_cookie(
-            response,
-            raw,
-            max_age=int(IDLE_TIMEOUT.total_seconds()),
-            secure=settings.secure_cookies,
-        )
-
-    def locked_response(request: Request, state: ThrottleState) -> Response:
-        wait = state.retry_after(clock.now())
-        return render(
-            request,
-            "message.html",
-            status_code=429,
-            heading="Too many attempts",
-            body=f"Try again in {max(1, int(wait.total_seconds()))} seconds.",
-        )
-
-    async def record_failure(email: str, ip: str) -> None:
-        now = clock.now()
-        for identity in (f"email:{email}", f"ip:{ip}"):
-            await store.save_throttle(identity, (await store.throttle(identity)).with_failure(now))
+    console = Console(
+        store=store,
+        key_store=key_store,
+        key_cache=key_cache,
+        hasher=hasher,
+        clock=clock,
+        settings=settings,
+        templates=templates,
+    )
+    render = console.render
+    current_account = console.current_account
+    start_session = console.start_session
+    locked_response = console.locked_response
+    record_failure = console.record_failure
 
     # ---------------------------------------------------------------- signup
 
@@ -141,7 +100,9 @@ def build_router(
         try:
             account = await store.create_account(normalised, hasher.hash(password))
         except AccountExistsError:
-            return render(request, "message.html", heading="Check your email", body=GENERIC_SIGNUP)
+            return render(
+                request, "layouts/message.html", heading="Check your email", body=GENERIC_SIGNUP
+            )
 
         token = issue_token(TokenKind.EMAIL_VERIFICATION, clock.now(), settings.session_secret)
         await store.issue_token(account.id, token.digest, token.kind, token.expires_at)
@@ -151,7 +112,9 @@ def build_router(
             "Verify your email",
             f"Open this link within 30 minutes: {link}",
         )
-        return render(request, "message.html", heading="Check your email", body=GENERIC_SIGNUP)
+        return render(
+            request, "layouts/message.html", heading="Check your email", body=GENERIC_SIGNUP
+        )
 
     @router.get("/verify")
     async def verify_email(request: Request, token: str = "") -> Response:
@@ -160,7 +123,7 @@ def build_router(
         if account_id is None:
             return render(
                 request,
-                "message.html",
+                "layouts/message.html",
                 status_code=400,
                 heading="Link not valid",
                 body="This link has expired or has already been used. Request a new one.",
@@ -168,7 +131,7 @@ def build_router(
         await store.set_email_verified(account_id, clock.now())
         return render(
             request,
-            "message.html",
+            "layouts/message.html",
             heading="Email verified",
             body="You can sign in now.",
         )
@@ -220,7 +183,7 @@ def build_router(
         if not account.can_log_in:
             return render(
                 request,
-                "message.html",
+                "layouts/message.html",
                 status_code=403,
                 heading="Account not active",
                 body="Verify your email address before signing in.",
@@ -265,7 +228,9 @@ def build_router(
             await store.enqueue_email(
                 normalised, "Reset your password", f"Open this link within 30 minutes: {link}"
             )
-        return render(request, "message.html", heading="Check your email", body=GENERIC_RESET)
+        return render(
+            request, "layouts/message.html", heading="Check your email", body=GENERIC_RESET
+        )
 
     @router.get("/reset/confirm")
     async def reset_confirm_form(request: Request, token: str = "") -> Response:
@@ -286,7 +251,7 @@ def build_router(
         if account_id is None:
             return render(
                 request,
-                "message.html",
+                "layouts/message.html",
                 status_code=400,
                 heading="Link not valid",
                 body="This link has expired or has already been used.",
@@ -295,7 +260,7 @@ def build_router(
         await store.delete_sessions(account_id)
         return render(
             request,
-            "message.html",
+            "layouts/message.html",
             heading="Password changed",
             body="Sign in with your new password.",
         )

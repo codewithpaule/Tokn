@@ -6,18 +6,23 @@ production picks PostgreSQL the moment ``TOKN_DATABASE_URL`` is set.
 
 from __future__ import annotations
 
+import uuid
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
+from typing import Any
 
-from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
+from fastapi import FastAPI, Request
+from fastapi.responses import Response
 from sqlalchemy.ext.asyncio import AsyncEngine
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.templating import Jinja2Templates
 
 from tokn_console.config import Settings
 from tokn_console.routes import build_router
-from tokn_console.web import SecurityHeadersMiddleware, SessionMiddleware
+from tokn_console.static import HashedStaticFiles, static_url
+from tokn_console.ui import FlashMiddleware
+from tokn_console.web import RequestIdMiddleware, SecurityHeadersMiddleware, SessionMiddleware
 from tokn_core.auth.ports import Clock, PasswordHasher
 from tokn_core.auth.store import AuthStore
 from tokn_core.key_auth import KeyCache, KeyStore
@@ -36,6 +41,12 @@ from tokn_infra.security import Argon2PasswordHasher
 PACKAGE_ROOT = Path(__file__).resolve().parent
 TEMPLATES = PACKAGE_ROOT / "templates"
 STATIC = PACKAGE_ROOT / "static"
+
+ERROR_COPY = {
+    403: ("Not allowed", "This account cannot do that."),
+    404: ("Page not found", "That page does not exist, or it has moved."),
+    500: ("Something went wrong", "Nothing was charged. Try again in a moment."),
+}
 
 
 def create_app(
@@ -83,9 +94,11 @@ def create_app(
         openapi_url=None,
         lifespan=lifespan,
     )
+    app.add_middleware(FlashMiddleware, settings=resolved)
     app.add_middleware(SessionMiddleware, store=store, pepper=resolved.session_secret, clock=clock)
     app.add_middleware(SecurityHeadersMiddleware, hsts=resolved.enforce_https)
-    app.mount("/static", StaticFiles(directory=str(STATIC)), name="static")
+    app.add_middleware(RequestIdMiddleware)
+    app.mount("/static", HashedStaticFiles(directory=str(STATIC)), name="static")
     app.include_router(
         build_router(
             store=store,
@@ -97,6 +110,37 @@ def create_app(
             templates=templates,
         )
     )
+
+    def error_page(request: Request, status: int, request_id: str) -> Response:
+        heading, body = ERROR_COPY.get(status, ERROR_COPY[500])
+        context: dict[str, Any] = {
+            "product": resolved.product_name,
+            "support_email": resolved.support_email,
+            "static_url": static_url,
+            "flash": None,
+            "session": None,
+            "heading": heading,
+            "body": body,
+            "request_id": request_id,
+        }
+        return templates.TemplateResponse(request, "errors/error.html", context, status_code=status)
+
+    @app.exception_handler(StarletteHTTPException)
+    async def http_error(request: Request, exc: StarletteHTTPException) -> Response:
+        request_id = getattr(request.state, "request_id", uuid.uuid4().hex)
+        if request.headers.get("hx-request") == "true":
+            return Response(
+                status_code=exc.status_code,
+                headers={"x-request-id": request_id},
+            )
+        return error_page(request, exc.status_code, request_id)
+
+    @app.exception_handler(Exception)
+    async def unhandled(request: Request, exc: Exception) -> Response:
+        request_id = getattr(request.state, "request_id", uuid.uuid4().hex)
+        if request.headers.get("hx-request") == "true":
+            return Response(status_code=500, headers={"x-request-id": request_id})
+        return error_page(request, 500, request_id)
 
     @app.get("/healthz")
     async def healthz() -> dict[str, str]:

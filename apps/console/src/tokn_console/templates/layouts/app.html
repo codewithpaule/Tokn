@@ -1,0 +1,20 @@
+{% extends "layouts/base.html" %}
+
+{% block nav %}
+<header class="nav">
+  <div class="shell shell--app nav__inner">
+    <a class="nav__wordmark" href="/app">{{ product }}</a>
+    <nav class="nav__links" aria-label="Console">
+      <a class="nav__link" href="/app" {% if page == 'overview' %}aria-current="page"{% endif %}>Overview</a>
+      <a class="nav__link" href="/app/keys" {% if page == 'keys' %}aria-current="page"{% endif %}>Keys</a>
+      <a class="nav__link" href="/docs">Docs</a>
+      <form method="post" action="/logout">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button type="submit" class="button button--quiet">Sign out</button>
+      </form>
+    </nav>
+  </div>
+</header>
+{% endblock %}
+
+{% block content %}<div class="shell shell--app page">{% block app_content %}{% endblock %}</div>{% endblock %}

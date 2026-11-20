@@ -1,0 +1,97 @@
+/* Reset, type and layout primitives. No component styling lives here. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--text-16);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+  margin: 0 0 var(--s2);
+}
+
+h1 { font-size: var(--text-40); }
+h2 { font-size: var(--text-28); }
+h3 { font-size: var(--text-20); }
+
+p { margin: 0 0 var(--s4); }
+
+a {
+  color: var(--green);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+a:hover { color: var(--green-deep); }
+
+:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+img,
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Skip link: first thing in the DOM, invisible until focused. */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--ink);
+  color: var(--paper);
+  padding: var(--s3) var(--s4);
+  z-index: calc(var(--z-nav) + 1);
+}
+
+.skip-link:focus {
+  left: var(--s4);
+  top: var(--s2);
+}
+
+.shell {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 var(--s5);
+}
+
+.shell--app { max-width: 1040px; }
+.shell--narrow { max-width: 420px; }
+
+main { display: block; }
+
+.muted { color: var(--muted); }
+.hint { color: var(--muted); font-size: var(--text-13); }
+.mono { font-family: var(--font-mono); font-size: var(--text-14); }
+.numeric { font-variant-numeric: tabular-nums; }
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
