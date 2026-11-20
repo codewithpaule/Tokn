@@ -27,6 +27,15 @@ class InMemoryKeyStore:
     async def by_prefix(self, prefix: str) -> KeyRecord | None:
         return self._by_prefix.get(prefix)
 
+    async def by_id(self, key_id: str) -> KeyRecord | None:
+        return self._by_id.get(key_id)
+
+    async def list_for_account(self, account_id: str) -> tuple[KeyRecord, ...]:
+        return tuple(r for r in self._by_id.values() if r.account_id == account_id)
+
+    async def create(self, record: KeyRecord) -> None:
+        self.add(record)
+
     def _update(self, key_id: str, **changes: object) -> None:
         record = self._by_id[key_id]
         updated = replace(record, **changes)  # type: ignore[arg-type]

@@ -17,8 +17,10 @@ from tokn_console.routes import build_router
 from tokn_console.web import SecurityHeadersMiddleware, SessionMiddleware
 from tokn_core.auth.ports import Clock, PasswordHasher
 from tokn_core.auth.store import AuthStore
+from tokn_core.key_auth import KeyCache, KeyStore
 from tokn_infra.clock import SystemClock
 from tokn_infra.memory.auth_store import InMemoryAuthStore
+from tokn_infra.memory.key_store import InMemoryKeyCache, InMemoryKeyStore
 from tokn_infra.security import Argon2PasswordHasher
 
 PACKAGE_ROOT = Path(__file__).resolve().parent
@@ -30,6 +32,8 @@ def create_app(
     settings: Settings | None = None,
     *,
     store: AuthStore | None = None,
+    key_store: KeyStore | None = None,
+    key_cache: KeyCache | None = None,
     hasher: PasswordHasher | None = None,
     clock: Clock | None = None,
 ) -> FastAPI:
@@ -41,6 +45,10 @@ def create_app(
         store = InMemoryAuthStore()
     hasher = hasher or Argon2PasswordHasher()
     clock = clock or SystemClock()
+    if key_store is None:
+        key_store = InMemoryKeyStore()
+    if key_cache is None:
+        key_cache = InMemoryKeyCache(clock)
 
     templates = Jinja2Templates(directory=str(TEMPLATES))
 
@@ -56,6 +64,8 @@ def create_app(
     app.include_router(
         build_router(
             store=store,
+            key_store=key_store,
+            key_cache=key_cache,
             hasher=hasher,
             clock=clock,
             settings=resolved,

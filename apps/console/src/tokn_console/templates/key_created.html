@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Your new key — {{ product }}{% endblock %}
+{% block content %}
+  <h1>Your new key</h1>
+
+  <p class="error" role="alert">Copy it now. This is the only time it is shown.</p>
+
+  <p class="mono secret">{{ raw }}</p>
+
+  <p class="hint">Point your client at the gateway and use this key as the bearer token.
+    Prefix: <span class="mono">{{ prefix }}</span>.</p>
+
+  <p><a href="/app/keys">Back to your keys</a></p>
+{% endblock %}

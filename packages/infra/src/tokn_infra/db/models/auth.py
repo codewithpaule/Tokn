@@ -19,9 +19,7 @@ from tokn_infra.db.base import Base
 class AuthSession(Base):
     __tablename__ = "sessions"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     digest: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
     account_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("accounts.id", ondelete="CASCADE"), nullable=False
@@ -41,9 +39,7 @@ class AuthSession(Base):
 class AuthToken(Base):
     __tablename__ = "auth_tokens"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     account_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("accounts.id", ondelete="CASCADE"), nullable=False
     )
@@ -56,9 +52,7 @@ class AuthToken(Base):
     )
 
     __table_args__ = (
-        CheckConstraint(
-            "kind IN ('email_verification', 'password_reset')", name="kind_known"
-        ),
+        CheckConstraint("kind IN ('email_verification', 'password_reset')", name="kind_known"),
         Index("ix_auth_tokens_account_kind", "account_id", "kind"),
     )
 
@@ -66,9 +60,7 @@ class AuthToken(Base):
 class RecoveryCode(Base):
     __tablename__ = "recovery_codes"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     account_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("accounts.id", ondelete="CASCADE"), nullable=False
     )

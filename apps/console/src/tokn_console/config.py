@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     support_email: str = "support@tokn.ng"
     product_name: str = "Tokn"
     key_prefix: str = "tokn"
+    key_environment: str = "live"
 
     session_secret: str = Field(default="dev-only-session-secret-change-me")
     key_pepper: str = Field(default="dev-only-pepper-change-me-please")

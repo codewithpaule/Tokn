@@ -32,7 +32,9 @@ def upgrade() -> None:
         sa.Column(
             "account_id",
             postgresql.UUID(as_uuid=True),
-            sa.ForeignKey("accounts.id", ondelete="CASCADE", name="fk_sessions_account_id_accounts"),
+            sa.ForeignKey(
+                "accounts.id", ondelete="CASCADE", name="fk_sessions_account_id_accounts"
+            ),
             nullable=False,
         ),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=NOW),

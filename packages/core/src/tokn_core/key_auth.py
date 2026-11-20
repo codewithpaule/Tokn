@@ -8,18 +8,32 @@ entry cannot authorise a wrong key.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Protocol
 
-from tokn_core.api_keys import KeyRecord, matches, parse_prefix
+from tokn_core.api_keys import (
+    REQUIRED_SCOPE,
+    GeneratedKey,
+    KeyRecord,
+    generate_key,
+    matches,
+    parse_prefix,
+)
 from tokn_core.auth.ports import Clock
-from tokn_core.errors import AuthenticationFailedError
+from tokn_core.errors import AuthenticationFailedError, DomainError
 
 CACHE_TTL_SECONDS = 30
 
 
 class KeyStore(Protocol):
     async def by_prefix(self, prefix: str) -> KeyRecord | None: ...
+
+    async def by_id(self, key_id: str) -> KeyRecord | None: ...
+
+    async def list_for_account(self, account_id: str) -> tuple[KeyRecord, ...]: ...
+
+    async def create(self, record: KeyRecord) -> None: ...
 
     async def touch_last_used(self, key_id: str, now: datetime) -> None: ...
 
@@ -76,3 +90,60 @@ async def revoke_key(
     """Revocation is effective immediately: the cache entry goes first, then the row."""
     await cache.invalidate(prefix)
     await store.revoke(key_id, clock.now())
+
+
+@dataclass(frozen=True, slots=True)
+class NewKeyRequest:
+    """What the customer asked for when they clicked "create key"."""
+
+    account_id: str
+    name: str
+    scopes: frozenset[str] = frozenset({REQUIRED_SCOPE})
+    spend_cap_micro: int | None = None
+    expires_at: datetime | None = None
+    ip_allowlist: tuple[str, ...] | None = None
+    concurrency_limit: int = 8
+
+
+class KeyIssuanceRefusedError(DomainError):
+    """The account may not hold keys yet, or asked for something impossible."""
+
+
+async def issue_key(
+    *,
+    request: NewKeyRequest,
+    store: KeyStore,
+    pepper: str,
+    product: str,
+    environment: str,
+    new_id: str,
+) -> GeneratedKey:
+    """Mint a key for an account. The raw value is returned and never stored."""
+    if not request.name.strip():
+        raise KeyIssuanceRefusedError("give the key a name you will recognise later")
+    if request.spend_cap_micro is not None and request.spend_cap_micro < 0:
+        raise KeyIssuanceRefusedError("a spend cap cannot be negative")
+    if not request.scopes:
+        raise KeyIssuanceRefusedError("choose at least one scope")
+    if request.concurrency_limit < 1:
+        raise KeyIssuanceRefusedError("the concurrency limit must be at least one")
+
+    key = generate_key(pepper=pepper, product=product, environment=environment)
+    await store.create(
+        KeyRecord(
+            id=new_id,
+            account_id=request.account_id,
+            prefix=key.prefix,
+            digest=key.digest,
+            scopes=request.scopes,
+            spend_cap_micro=request.spend_cap_micro,
+            expires_at=request.expires_at,
+            ip_allowlist=request.ip_allowlist,
+            concurrency_limit=request.concurrency_limit,
+        )
+    )
+    return key
+
+
+async def list_keys(store: KeyStore, account_id: str) -> tuple[KeyRecord, ...]:
+    return await store.list_for_account(account_id)

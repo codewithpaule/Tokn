@@ -9,7 +9,14 @@ import pytest
 
 from tokn_core.api_keys import KeyRecord, generate_key
 from tokn_core.errors import AuthenticationFailedError
-from tokn_core.key_auth import CACHE_TTL_SECONDS, authenticate, revoke_key
+from tokn_core.key_auth import (
+    CACHE_TTL_SECONDS,
+    KeyIssuanceRefusedError,
+    NewKeyRequest,
+    authenticate,
+    issue_key,
+    revoke_key,
+)
 from tokn_infra.memory.key_store import InMemoryKeyCache, InMemoryKeyStore
 
 PEPPER = "test-pepper-not-a-real-secret"
@@ -133,3 +140,39 @@ async def test_a_poisoned_cache_entry_cannot_authorise_the_wrong_key() -> None:
 
     with pytest.raises(AuthenticationFailedError):
         await authenticate_raw(raw, store, cache, clock)
+
+
+@pytest.mark.parametrize(
+    "candidate",
+    [
+        NewKeyRequest(account_id="acc_1", name="   "),
+        NewKeyRequest(account_id="acc_1", name="ok", spend_cap_micro=-1),
+        NewKeyRequest(account_id="acc_1", name="ok", scopes=frozenset()),
+        NewKeyRequest(account_id="acc_1", name="ok", concurrency_limit=0),
+    ],
+)
+async def test_impossible_key_requests_are_refused(candidate: NewKeyRequest) -> None:
+    store, _, _, _, _ = setup()
+    with pytest.raises(KeyIssuanceRefusedError):
+        await issue_key(
+            request=candidate,
+            store=store,
+            pepper=PEPPER,
+            product="tokn",
+            environment="live",
+            new_id="key_new",
+        )
+
+
+async def test_a_refused_request_leaves_no_key_behind() -> None:
+    store, _, _, _, _ = setup()
+    with pytest.raises(KeyIssuanceRefusedError):
+        await issue_key(
+            request=NewKeyRequest(account_id="acc_1", name=""),
+            store=store,
+            pepper=PEPPER,
+            product="tokn",
+            environment="live",
+            new_id="key_new",
+        )
+    assert await store.by_id("key_new") is None

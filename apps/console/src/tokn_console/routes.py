@@ -7,9 +7,10 @@ from an unregistered one. Every state change rotates or destroys the session.
 from __future__ import annotations
 
 import re
+import uuid
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, Form, Request, Response
+from fastapi import APIRouter, Depends, Form, HTTPException, Request, Response
 from fastapi.responses import RedirectResponse
 from starlette.templating import Jinja2Templates
 
@@ -21,6 +22,7 @@ from tokn_console.web import (
     require_csrf,
     set_session_cookie,
 )
+from tokn_core.api_keys import KeyRecord
 from tokn_core.auth.hashing import hash_secret, new_secret
 from tokn_core.auth.passwords import WeakPasswordError, validate_password
 from tokn_core.auth.ports import Clock, PasswordHasher
@@ -30,6 +32,16 @@ from tokn_core.auth.throttle import ThrottleState, is_over_limit
 from tokn_core.auth.tokens import TokenKind, issue_token, new_recovery_codes
 from tokn_core.auth.totp import generate_secret, provisioning_uri, verify
 from tokn_core.errors import AccountExistsError
+from tokn_core.key_auth import (
+    KeyCache,
+    KeyIssuanceRefusedError,
+    KeyStore,
+    NewKeyRequest,
+    issue_key,
+    list_keys,
+    revoke_key,
+)
+from tokn_core.money import Naira
 
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 DUMMY_HASH = "$argon2id$v=19$m=19456,t=2,p=1$c29tZXNhbHRzYWx0$" + "0" * 43
@@ -42,6 +54,8 @@ GENERIC_RESET = "If that address has an account, a reset link is on its way."
 def build_router(
     *,
     store: AuthStore,
+    key_store: KeyStore,
+    key_cache: KeyCache,
     hasher: PasswordHasher,
     clock: Clock,
     settings: Settings,
@@ -331,7 +345,110 @@ def build_router(
             return RedirectResponse("/login", status_code=303)
         return render(request, "app.html", account=account)
 
+    # ------------------------------------------------------------------ keys
+
+    def keys_view(
+        request: Request,
+        account: AccountRecord,
+        keys: tuple[KeyRecord, ...],
+        *,
+        error: str | None = None,
+        status_code: int = 200,
+    ) -> Response:
+        return render(
+            request,
+            "keys.html",
+            status_code=status_code,
+            account=account,
+            keys=keys,
+            enrolled=account.totp_secret is not None,
+            error=error,
+        )
+
+    def step_up_ok(account: AccountRecord, code: str) -> bool:
+        return account.totp_secret is not None and verify(account.totp_secret, code, clock.now())
+
+    @router.get("/app/keys")
+    async def keys_page(request: Request) -> Response:
+        account = await current_account(request)
+        if account is None:
+            return RedirectResponse("/login", status_code=303)
+        return keys_view(request, account, await list_keys(key_store, account.id))
+
+    @router.post("/app/keys", dependencies=[Depends(require_csrf)])
+    async def create_key(
+        request: Request,
+        name: str = Form(""),
+        code: str = Form(""),
+        spend_cap_naira: str = Form(""),
+    ) -> Response:
+        account = await current_account(request)
+        if account is None:
+            return RedirectResponse("/login", status_code=303)
+        if account.totp_secret is None:
+            return RedirectResponse("/app/2fa", status_code=303)
+
+        keys = await list_keys(key_store, account.id)
+        if not step_up_ok(account, code):
+            return keys_view(
+                request, account, keys, error="That code did not match.", status_code=422
+            )
+
+        try:
+            cap = _parse_cap(spend_cap_naira)
+        except (ValueError, ArithmeticError):
+            return keys_view(
+                request,
+                account,
+                keys,
+                error="Enter the cap in naira, for example 5000.",
+                status_code=422,
+            )
+
+        try:
+            key = await issue_key(
+                request=NewKeyRequest(account_id=account.id, name=name, spend_cap_micro=cap),
+                store=key_store,
+                pepper=settings.key_pepper,
+                product=settings.key_prefix,
+                environment=settings.key_environment,
+                new_id=uuid.uuid4().hex,
+            )
+        except KeyIssuanceRefusedError as error:
+            return keys_view(request, account, keys, error=str(error), status_code=422)
+
+        return render(request, "key_created.html", raw=key.raw, prefix=key.prefix)
+
+    @router.post("/app/keys/revoke", dependencies=[Depends(require_csrf)])
+    async def revoke(request: Request, key_id: str = Form(""), code: str = Form("")) -> Response:
+        account = await current_account(request)
+        if account is None:
+            return RedirectResponse("/login", status_code=303)
+
+        record = await key_store.by_id(key_id)
+        if record is None or record.account_id != account.id:
+            raise HTTPException(status_code=404, detail="no such key")
+
+        keys = await list_keys(key_store, account.id)
+        if not step_up_ok(account, code):
+            return keys_view(
+                request, account, keys, error="That code did not match.", status_code=422
+            )
+
+        await revoke_key(
+            prefix=record.prefix, key_id=record.id, store=key_store, cache=key_cache, clock=clock
+        )
+        return RedirectResponse("/app/keys", status_code=303)
+
     return router
+
+
+def _parse_cap(value: str) -> int | None:
+    """Parse a naira amount into micro-naira. Empty means no cap."""
+    text = value.strip().replace(",", "")
+    if not text:
+        return None
+    return Naira.from_naira(text).micro
 
 
 async def _second_factor_ok(

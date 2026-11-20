@@ -22,6 +22,7 @@ from tokn_console.config import Settings
 from tokn_console.web import CSRF_COOKIE
 from tokn_core.auth.totp import code_at
 from tokn_infra.memory.auth_store import InMemoryAuthStore
+from tokn_infra.memory.key_store import InMemoryKeyCache, InMemoryKeyStore
 
 BASE = "https://console.test"
 STRONG = "a-long-passphrase-2026"
@@ -57,6 +58,8 @@ class FastHasher:
 class Harness:
     app: FastAPI
     store: InMemoryAuthStore
+    key_store: InMemoryKeyStore
+    key_cache: InMemoryKeyCache
     clock: FrozenClock
     client: AsyncClient
 
@@ -65,14 +68,25 @@ class Harness:
 async def harness() -> AsyncIterator[Harness]:
     store = InMemoryAuthStore()
     clock = FrozenClock()
+    key_store = InMemoryKeyStore()
+    key_cache = InMemoryKeyCache(clock)
     app = create_app(
         Settings(env="development", secure_cookies=True, console_url=BASE),
         store=store,
+        key_store=key_store,
+        key_cache=key_cache,
         hasher=FastHasher(),
         clock=clock,
     )
     async with AsyncClient(transport=ASGITransport(app=app), base_url=BASE) as client:
-        yield Harness(app=app, store=store, clock=clock, client=client)
+        yield Harness(
+            app=app,
+            store=store,
+            key_store=key_store,
+            key_cache=key_cache,
+            clock=clock,
+            client=client,
+        )
 
 
 async def csrf_token(client: AsyncClient, path: str = "/login") -> str:
