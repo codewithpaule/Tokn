@@ -19,6 +19,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.templating import Jinja2Templates
 
 from tokn_console.config import Settings
+from tokn_console.context import Console
 from tokn_console.routes import build_router
 from tokn_console.static import HashedStaticFiles, static_url
 from tokn_console.ui import FlashMiddleware
@@ -99,17 +100,16 @@ def create_app(
     app.add_middleware(SecurityHeadersMiddleware, hsts=resolved.enforce_https)
     app.add_middleware(RequestIdMiddleware)
     app.mount("/static", HashedStaticFiles(directory=str(STATIC)), name="static")
-    app.include_router(
-        build_router(
-            store=store,
-            key_store=key_store,
-            key_cache=key_cache,
-            hasher=hasher,
-            clock=clock,
-            settings=resolved,
-            templates=templates,
-        )
+    console = Console(
+        store=store,
+        key_store=key_store,
+        key_cache=key_cache,
+        hasher=hasher,
+        clock=clock,
+        settings=resolved,
+        templates=templates,
     )
+    app.include_router(build_router(console))
 
     def error_page(request: Request, status: int, request_id: str) -> Response:
         heading, body = ERROR_COPY.get(status, ERROR_COPY[500])
