@@ -58,7 +58,7 @@ class Catalogue(Protocol):
 
 
 class WalletStore(Protocol):
-    async def reserve(self, *, request_id: str, account_id: str, hold: Naira) -> bool:
+    async def reserve(self, *, request_id: str, account_id: str, key_id: str, hold: Naira) -> bool:
         """Atomically hold credit. False means the balance cannot cover it."""
 
     async def settle(self, *, request_id: str, charge: Naira) -> None:
@@ -107,7 +107,7 @@ class Proxy:
             entry.price.hold(self._estimate_input(payload), max_out) for entry in attemptable
         )
         if not await self._wallet.reserve(
-            request_id=request_id, account_id=key.account_id, hold=hold
+            request_id=request_id, account_id=key.account_id, key_id=key.id, hold=hold
         ):
             raise HTTPException(
                 status_code=status.HTTP_402_PAYMENT_REQUIRED,

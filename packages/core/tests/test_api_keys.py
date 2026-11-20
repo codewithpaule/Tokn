@@ -8,6 +8,7 @@ import pytest
 from tokn_core.api_keys import (
     ENVIRONMENTS,
     KEY_BYTES,
+    VISIBLE_PREFIX_CHARS,
     KeyFormatError,
     KeyRecord,
     generate_key,
@@ -40,7 +41,7 @@ def test_a_generated_key_has_the_published_shape() -> None:
     assert head == "tokn"
     assert environment == "live"
     assert len(body) == KEY_BYTES * 2
-    assert key.prefix == f"tokn_live_{body[:6]}"
+    assert key.prefix == f"tokn_live_{body[:VISIBLE_PREFIX_CHARS]}"
     assert key.digest == hash_secret(key.raw, PEPPER)
     assert key.raw not in key.digest
 

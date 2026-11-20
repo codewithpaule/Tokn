@@ -15,6 +15,7 @@ from typing import Protocol
 from tokn_core.api_keys import (
     REQUIRED_SCOPE,
     GeneratedKey,
+    KeyPrefixConflictError,
     KeyRecord,
     generate_key,
     matches,
@@ -140,9 +141,51 @@ async def issue_key(
             expires_at=request.expires_at,
             ip_allowlist=request.ip_allowlist,
             concurrency_limit=request.concurrency_limit,
+            name=request.name,
         )
     )
     return key
+
+
+async def issue_key_with_retry(
+    *,
+    request: NewKeyRequest,
+    store: KeyStore,
+    pepper: str,
+    product: str,
+    environment: str,
+    new_id: str,
+    attempts: int = 3,
+) -> GeneratedKey:
+    """Issue a key, retrying if the visible prefix collides.
+
+    The prefix is 48 bits, so a collision is vanishingly unlikely; the unique constraint
+    still deserves a path that does not surface as a 500.
+    """
+    for attempt in range(1, attempts):
+        try:
+            return await issue_key(
+                request=request,
+                store=store,
+                pepper=pepper,
+                product=product,
+                environment=environment,
+                new_id=_attempt_id(new_id, attempt),
+            )
+        except KeyPrefixConflictError:
+            continue
+    return await issue_key(
+        request=request,
+        store=store,
+        pepper=pepper,
+        product=product,
+        environment=environment,
+        new_id=_attempt_id(new_id, attempts),
+    )
+
+
+def _attempt_id(new_id: str, attempt: int) -> str:
+    return new_id if attempt == 1 else f"{new_id}-{attempt}"
 
 
 async def list_keys(store: KeyStore, account_id: str) -> tuple[KeyRecord, ...]:

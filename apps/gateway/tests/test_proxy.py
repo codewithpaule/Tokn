@@ -57,7 +57,7 @@ class FakeWallet:
         self.settled: list[tuple[str, Naira]] = []
         self.released: list[str] = []
 
-    async def reserve(self, *, request_id: str, account_id: str, hold: Naira) -> bool:
+    async def reserve(self, *, request_id: str, account_id: str, key_id: str, hold: Naira) -> bool:
         if hold.micro > self.balance.micro:
             return False
         self.balance = self.balance - hold

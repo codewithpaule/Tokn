@@ -37,7 +37,7 @@ from tokn_core.key_auth import (
     KeyIssuanceRefusedError,
     KeyStore,
     NewKeyRequest,
-    issue_key,
+    issue_key_with_retry,
     list_keys,
     revoke_key,
 )
@@ -406,7 +406,7 @@ def build_router(
             )
 
         try:
-            key = await issue_key(
+            key = await issue_key_with_retry(
                 request=NewKeyRequest(account_id=account.id, name=name, spend_cap_micro=cap),
                 store=key_store,
                 pepper=settings.key_pepper,

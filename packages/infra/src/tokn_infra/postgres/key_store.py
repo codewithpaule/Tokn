@@ -10,8 +10,9 @@ import uuid
 from datetime import datetime
 
 from sqlalchemy import select, update
+from sqlalchemy.exc import IntegrityError
 
-from tokn_core.api_keys import KeyRecord
+from tokn_core.api_keys import KeyPrefixConflictError, KeyRecord
 from tokn_infra.db.models import ApiKey
 from tokn_infra.postgres.session import SessionFactory
 
@@ -57,6 +58,10 @@ class PostgresKeyStore:
                     concurrency_limit=record.concurrency_limit,
                 )
             )
+            try:
+                await session.flush()
+            except IntegrityError as error:
+                raise KeyPrefixConflictError(record.prefix) from error
 
     async def touch_last_used(self, key_id: str, now: datetime) -> None:
         async with self._sessions() as session, session.begin():

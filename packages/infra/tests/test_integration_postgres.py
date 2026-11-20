@@ -14,7 +14,6 @@ import pytest
 import pytest_asyncio
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
-from sqlalchemy.pool import NullPool
 
 from tokn_core.api_keys import KeyRecord, generate_key
 from tokn_core.auth.throttle import ThrottleState
@@ -29,7 +28,9 @@ PEPPER = "integration-pepper-not-a-real-secret"
 NOW = datetime(2026, 11, 20, 12, 0, tzinfo=UTC)
 
 pytestmark = [
-    pytest.mark.skipif(not DATABASE_URL, reason="set TOKN_TEST_DATABASE_URL to run integration tests"),
+    pytest.mark.skipif(
+        not DATABASE_URL, reason="set TOKN_TEST_DATABASE_URL to run integration tests"
+    ),
     pytest.mark.asyncio(loop_scope="module"),
 ]
 

@@ -18,13 +18,20 @@ from tokn_core.auth.hashing import digests_match, hash_secret
 from tokn_core.errors import DomainError
 
 KEY_BYTES = 32
-VISIBLE_PREFIX_CHARS = 6
+# 48 bits of the secret, kept in clear so a key can be identified in support and by
+# GitHub secret scanning. Six characters (24 bits) collides about once in 140 runs at 500
+# keys, which a unique column would turn into a failed request.
+VISIBLE_PREFIX_CHARS = 12
 ENVIRONMENTS = frozenset({"live", "test"})
 REQUIRED_SCOPE = "infer"
 
 
 class KeyFormatError(DomainError):
     """The presented string is not shaped like a Tokn key."""
+
+
+class KeyPrefixConflictError(DomainError):
+    """The generated visible prefix already exists. The caller should try again."""
 
 
 @dataclass(frozen=True, slots=True)

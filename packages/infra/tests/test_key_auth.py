@@ -7,7 +7,12 @@ from datetime import UTC, datetime, timedelta
 
 import pytest
 
-from tokn_core.api_keys import KeyRecord, generate_key
+from tokn_core.api_keys import (
+    GeneratedKey,
+    KeyPrefixConflictError,
+    KeyRecord,
+    generate_key,
+)
 from tokn_core.errors import AuthenticationFailedError
 from tokn_core.key_auth import (
     CACHE_TTL_SECONDS,
@@ -15,6 +20,7 @@ from tokn_core.key_auth import (
     NewKeyRequest,
     authenticate,
     issue_key,
+    issue_key_with_retry,
     revoke_key,
 )
 from tokn_infra.memory.key_store import InMemoryKeyCache, InMemoryKeyStore
@@ -176,3 +182,43 @@ async def test_a_refused_request_leaves_no_key_behind() -> None:
             new_id="key_new",
         )
     assert await store.by_id("key_new") is None
+
+
+class FlakyStore(InMemoryKeyStore):
+    """Fails the first N creates the way a unique-prefix collision would."""
+
+    def __init__(self, failures: int) -> None:
+        super().__init__()
+        self.failures = failures
+
+    async def create(self, record: KeyRecord) -> None:
+        if self.failures > 0:
+            self.failures -= 1
+            raise KeyPrefixConflictError(record.prefix)
+        await super().create(record)
+
+
+async def _issue(store: InMemoryKeyStore) -> GeneratedKey:
+    return await issue_key_with_retry(
+        request=NewKeyRequest(account_id="acc_1", name="laptop"),
+        store=store,
+        pepper=PEPPER,
+        product="tokn",
+        environment="live",
+        new_id="key_new",
+    )
+
+
+async def test_a_prefix_collision_is_retried() -> None:
+    store = FlakyStore(failures=2)
+    key = await _issue(store)
+
+    assert key.raw.startswith("tokn_live_")
+    assert len(await store.list_for_account("acc_1")) == 1
+
+
+async def test_a_collision_that_never_clears_surfaces_as_an_error() -> None:
+    store = FlakyStore(failures=99)
+    with pytest.raises(KeyPrefixConflictError):
+        await _issue(store)
+    assert await store.list_for_account("acc_1") == ()
