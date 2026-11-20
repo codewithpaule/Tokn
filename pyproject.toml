@@ -1,0 +1,95 @@
+[project]
+name = "tokn"
+version = "0.1.0"
+description = "Tokn — secure inference gateway and prepaid API brokerage"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "Apache-2.0"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28",
+    "hypothesis>=6.122",
+    "mypy>=1.14",
+    "pre-commit>=4.0",
+    "pytest>=8.3",
+    "pytest-asyncio>=0.25",
+    "pytest-cov>=6.0",
+    "ruff>=0.9",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.workspace]
+members = ["packages/*", "apps/*"]
+
+[tool.uv.sources]
+tokn-core = { workspace = true }
+tokn-infra = { workspace = true }
+tokn-gateway = { workspace = true }
+tokn-console = { workspace = true }
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["packages", "apps"]
+extend-exclude = ["docs", "deploy"]
+
+[tool.ruff.lint]
+select = [
+    "A",      # shadowed builtins
+    "ANN",    # annotations
+    "ASYNC",  # async correctness
+    "B",      # bugbear
+    "C4",     # comprehensions
+    "DTZ",    # naive datetimes
+    "E",      # pycodestyle errors
+    "F",      # pyflakes
+    "I",      # import order
+    "N",      # naming
+    "PTH",    # pathlib
+    "PT",     # pytest style
+    "RET",    # return statements
+    "RUF",    # ruff-specific
+    "S",      # bandit
+    "SIM",    # simplify
+    "T20",    # no print
+    "UP",     # pyupgrade
+    "W",      # pycodestyle warnings
+]
+ignore = ["ANN401"]
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/**" = ["ANN", "S101"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["tokn_core", "tokn_infra", "tokn_gateway", "tokn_console"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_unreachable = true
+show_error_codes = true
+pretty = true
+files = ["packages", "apps"]
+exclude = ["/tests/"]
+
+[[tool.mypy.overrides]]
+module = ["tokn_core.*", "tokn_infra.*", "tokn_gateway.*", "tokn_console.*"]
+disallow_untyped_decorators = false
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["packages", "apps"]
+asyncio_mode = "auto"
+addopts = "-q --strict-markers --strict-config"
+
+[tool.coverage.run]
+branch = true
+source = ["packages/core/src/tokn_core"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true

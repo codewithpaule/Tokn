@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+build/
+dist/
+
+# Tooling caches
+.coverage
+coverage.*
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+node_modules/
+.playwright/
+test-results/
+
+# Secrets and local configuration. Only .env.example is committed.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Local databases and scratch files
+*.db
+*.sqlite3
+*.log
+.DS_Store
+Thumbs.db
