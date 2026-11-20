@@ -8,6 +8,7 @@ dependencies = [
     "tokn-core",
     "alembic>=1.14",
     "asyncpg>=0.30",
+    "redis>=5.2",
     "sqlalchemy[asyncio]>=2.0.36",
 ]
 

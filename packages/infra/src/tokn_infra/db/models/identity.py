@@ -10,7 +10,7 @@ import uuid
 from datetime import datetime
 from enum import StrEnum
 
-from sqlalchemy import Boolean, CheckConstraint, DateTime, ForeignKey, Integer, Text
+from sqlalchemy import BigInteger, Boolean, CheckConstraint, DateTime, ForeignKey, Integer, Text
 from sqlalchemy.dialects.postgresql import ARRAY, CITEXT, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -68,10 +68,12 @@ class ApiKey(Base):
     )
     auto_paused: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false")
     concurrency_limit: Mapped[int] = mapped_column(Integer, nullable=False, server_default="8")
+    spent_micro: Mapped[int] = mapped_column(BigInteger, nullable=False, server_default="0")
 
     __table_args__ = (
         CheckConstraint(
             "spend_cap_micro IS NULL OR spend_cap_micro >= 0", name="spend_cap_non_negative"
         ),
         CheckConstraint("concurrency_limit > 0", name="concurrency_positive"),
+        CheckConstraint("spent_micro >= 0", name="spent_non_negative"),
     )
