@@ -124,6 +124,32 @@ document.addEventListener("DOMContentLoaded", () => {
     showToast({ kind: "success", message: "Back online." });
   });
 
+  // Privacy bar: dismissed once per tab, remembered in sessionStorage (not a cookie).
+  const privacy = document.querySelector("[data-dismiss-privacy]");
+  if (privacy) {
+    if (sessionStorage.getItem("privacy-ack") === "1") {
+      document.querySelector(".privacy-bar")?.remove();
+    } else {
+      privacy.addEventListener("click", () => {
+        sessionStorage.setItem("privacy-ack", "1");
+        document.querySelector(".privacy-bar")?.remove();
+      });
+    }
+  }
+
+  // Comparison table: reveal the rows beyond the first five.
+  const compareToggle = document.querySelector("[data-compare-toggle]");
+  if (compareToggle) {
+    compareToggle.addEventListener("click", () => {
+      const open = compareToggle.getAttribute("aria-expanded") === "true";
+      document.querySelectorAll(".compare__more").forEach((row) => {
+        row.hidden = open;
+      });
+      compareToggle.setAttribute("aria-expanded", open ? "false" : "true");
+      compareToggle.textContent = open ? "Show all 8 settings" : "Show fewer";
+    });
+  }
+
   const initial = document.querySelector("#flash-data");
   if (initial) {
     try {

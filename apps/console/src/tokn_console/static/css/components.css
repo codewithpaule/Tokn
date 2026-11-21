@@ -227,28 +227,16 @@ select:focus-visible {
 .nav__panel { display: none; }
 
 @media (max-width: 767px) {
-  .nav__toggle { display: inline-flex; align-items: center; justify-content: center; }
-  .nav__links { display: none; }
-  .nav__panel[data-open="true"] {
-    display: block;
-    border-top: 1px solid var(--line);
-    padding: var(--s2) 0 var(--s4);
-  }
-  .nav__panel a,
-  .nav__panel button {
-    display: flex;
-    align-items: center;
+  .nav__inner { flex-wrap: wrap; gap: var(--s3); padding-block: var(--s2); }
+  .nav__links {
+    flex-wrap: wrap;
+    gap: var(--s3);
+    margin-left: 0;
     width: 100%;
-    min-height: 44px;
-    padding: 0 var(--s2);
-    font: inherit;
-    color: var(--ink);
-    text-decoration: none;
-    background: none;
-    border: 0;
-    text-align: left;
-    cursor: pointer;
   }
+  .nav__link { font-size: var(--text-13); padding: var(--s2) 0; }
+  .nav__links .button { width: 100%; }
+  .nav__select { display: none; }
 }
 
 /* -- footer ------------------------------------------------------------- */

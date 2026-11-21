@@ -1,4 +1,7 @@
-/* Design tokens. Everything else in the CSS references these. */
+/* Design tokens.
+   Scale and rhythm mirror the reference site's compiled CSS: a 4px spacing base, an 8px
+   radius base with named multipliers, no shadows, 150ms cubic-bezier(.4,0,.2,1).
+   Colours are ours: ink/paper/green/yellow. */
 
 @font-face {
   font-family: "Montserrat";
@@ -8,8 +11,6 @@
   font-display: swap;
 }
 
-/* A metric-compatible fallback so the first paint is not visibly reflowed.
-   size-adjust is tuned against Montserrat's x-height. */
 @font-face {
   font-family: "Montserrat Fallback";
   src: local("Arial"), local("Helvetica"), local("Liberation Sans");
@@ -20,11 +21,12 @@
 }
 
 :root {
-  /* colour */
+  /* colour roles */
   --ink: #0e1210;
   --paper: #fbfbf8;
   --surface: #ffffff;
   --line: #e3e6e0;
+  --line-strong: #cdd2cb;
   --muted: #5a625d;
   --green: #1e6b4b;
   --green-deep: #154d36;
@@ -34,7 +36,8 @@
   --danger: #a33a2c;
   --danger-tint: #f7e9e6;
 
-  /* spacing: 4px steps */
+  /* spacing: 4px base, same steps as the reference (0.5 … 10) */
+  --space: 4px;
   --s1: 4px;
   --s2: 8px;
   --s3: 12px;
@@ -43,21 +46,50 @@
   --s6: 32px;
   --s7: 40px;
   --s8: 56px;
+  --s9: 72px;
+  --s10: 96px;
 
-  /* type */
+  /* radii: 8px base with the reference's multipliers */
+  --radius: 8px;
+  --radius-sm: 5px;
+  --radius-md: 6px;
+  --radius-lg: 11px;
+  --radius-xl: 14px;
+  --radius-2xl: 21px;
+  --radius-pill: 9999px;
+  --radius-control: var(--radius);
+  --radius-card: var(--radius-lg);
+
+  /* type: dense scale, 10–56px, matching the reference's range */
+  --text-10: 10px;
+  --text-11: 11px;
+  --text-12: 12px;
   --text-13: 13px;
   --text-14: 14px;
+  --text-15: 15px;
   --text-16: 16px;
+  --text-18: 18px;
   --text-20: 20px;
-  --text-28: 28px;
+  --text-22: 22px;
+  --text-26: 26px;
+  --text-32: 32px;
   --text-40: 40px;
+  --text-52: 52px;
 
-  /* shape and motion */
-  --radius: 12px;
-  --radius-control: 8px;
-  --motion-fast: 120ms;
+  --leading-tight: 1.15;
+  --leading-body: 1.65;
+  --tracking-tight: -0.02em;
+
+  /* motion: the reference's 150ms and curve */
+  --motion: 150ms;
   --motion-slow: 200ms;
-  --ease: cubic-bezier(0.2, 0.7, 0.3, 1);
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* layout */
+  --container: 1200px;
+  --container-wide: 1280px;
+  --container-prose: 64ch;
+  --nav-height: 64px;
 
   /* layering */
   --z-nav: 100;
@@ -65,12 +97,12 @@
   --z-toast: 300;
 
   --font-sans: "Montserrat", "Montserrat Fallback", system-ui, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
 }
 
 @media (prefers-reduced-motion: reduce) {
   :root {
-    --motion-fast: 0ms;
+    --motion: 0ms;
     --motion-slow: 0ms;
   }
 }

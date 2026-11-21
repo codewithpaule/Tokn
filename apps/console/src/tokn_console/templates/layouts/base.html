@@ -17,6 +17,17 @@
     <a class="skip-link" href="#main">Skip to content</a>
     <div id="progress" class="progress" data-active="false" aria-hidden="true"></div>
 
+    {% if not session %}
+    <div class="privacy-bar">
+      <div class="shell privacy-bar__inner">
+        <span class="privacy-bar__prompt">tokn ~ %</span>
+        <span>No analytics, no ad pixels, no third-party scripts.</span>
+        <a class="privacy-bar__link" href="/privacy">Privacy</a>
+        <button type="button" class="privacy-bar__action" data-dismiss-privacy>Got it</button>
+      </div>
+    </div>
+    {% endif %}
+
     {% block nav %}{% endblock %}
 
     <main id="main" class="{% block main_class %}{% endblock %}">
@@ -25,6 +36,13 @@
 
     {% include "components/footer.html" %}
     <div id="toasts" class="toasts" role="region" aria-label="Notifications"></div>
+
+    {% if not session %}
+    <div class="mobile-bar">
+      <a class="button button--outline" href="/login">Log in</a>
+      <a class="button button--primary" href="/signup">Get API key</a>
+    </div>
+    {% endif %}
 
     {% if flash %}
       <div id="flash-data" hidden
