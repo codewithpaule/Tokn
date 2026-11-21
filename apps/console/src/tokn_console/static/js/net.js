@@ -150,6 +150,32 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Mobile navigation panel: opens, closes on Escape, on outside click, on navigation.
+  const navToggle = document.querySelector("[data-nav-toggle]");
+  const navPanel = document.querySelector("[data-nav-panel]");
+  if (navToggle && navPanel) {
+    const setOpen = (open) => {
+      navPanel.dataset.open = String(open);
+      navToggle.setAttribute("aria-expanded", String(open));
+    };
+    navToggle.addEventListener("click", (event) => {
+      event.stopPropagation();
+      setOpen(navPanel.dataset.open !== "true");
+    });
+    navPanel.addEventListener("click", (event) => {
+      if (event.target.closest("a")) setOpen(false);
+    });
+    document.addEventListener("click", (event) => {
+      if (!navPanel.contains(event.target) && event.target !== navToggle) setOpen(false);
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        setOpen(false);
+        navToggle.focus();
+      }
+    });
+  }
+
   const initial = document.querySelector("#flash-data");
   if (initial) {
     try {

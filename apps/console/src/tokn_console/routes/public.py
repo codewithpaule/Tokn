@@ -142,7 +142,7 @@ def build_router(console: Console) -> APIRouter:
             request,
             "public/coding.html",
             heading="Connect your agent",
-            lede="Four families, one key. Pick yours for the exact settings.",
+            lede="One key for every client. Pick yours for the exact settings.",
             tools=TOOLS,
             tool=None,
             page="coding",

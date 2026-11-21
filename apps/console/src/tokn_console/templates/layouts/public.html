@@ -3,20 +3,39 @@
 {% block nav %}
 <header class="nav">
   <div class="shell nav__inner">
-    <a class="nav__wordmark" href="/">{{ product }}</a>
+    <a class="nav__brand" href="/" aria-label="{{ product }} home">
+      <span class="nav__mark" aria-hidden="true">T</span>
+      <span class="nav__wordmark">{{ product }}</span>
+    </a>
+
     <nav class="nav__links" aria-label="Main">
       <a class="nav__link" href="/coding" {% if page == 'coding' %}aria-current="page"{% endif %}>Coding</a>
       <a class="nav__link" href="/pricing" {% if page == 'pricing' %}aria-current="page"{% endif %}>Pricing</a>
       <a class="nav__link" href="/docs" {% if page == 'docs' %}aria-current="page"{% endif %}>Docs</a>
       <a class="nav__link" href="/support" {% if page == 'support' %}aria-current="page"{% endif %}>Support</a>
+    </nav>
+
+    <div class="nav__right">
+      <span class="nav__chip">NGN</span>
       {% if session %}
-        <a class="button button--outline" href="/app">Open console</a>
+        <a class="nav__link" href="/app">Console</a>
       {% else %}
         <a class="nav__link" href="/login">Log in</a>
-        <span class="nav__select" aria-hidden="true">NGN</span>
-      <a class="button button--primary" href="/signup">Get API key →</a>
+        <a class="button button--primary button--sm" href="/signup">Get API key <span class="arrow" aria-hidden="true">→</span></a>
       {% endif %}
-    </nav>
+    </div>
+
+    <button type="button" class="nav__toggle" aria-expanded="false" aria-controls="nav-panel"
+            data-nav-toggle>Menu</button>
+  </div>
+
+  <div class="shell nav__panel" id="nav-panel" data-nav-panel>
+    <a href="/coding">Coding</a>
+    <a href="/pricing">Pricing</a>
+    <a href="/docs">Docs</a>
+    <a href="/support">Support</a>
+    <a href="/login">Log in</a>
+    <a class="button button--primary" href="/signup">Get API key <span class="arrow" aria-hidden="true">→</span></a>
   </div>
 </header>
 {% endblock %}
