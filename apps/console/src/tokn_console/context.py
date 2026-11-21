@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
+from typing import Protocol
 
 from fastapi import Request, Response
 from fastapi.responses import RedirectResponse
@@ -27,6 +28,13 @@ from tokn_core.auth.sessions import IDLE_TIMEOUT, Session, new_session
 from tokn_core.auth.store import AccountRecord, AuthStore
 from tokn_core.auth.throttle import ThrottleState
 from tokn_core.key_auth import KeyCache, KeyStore
+from tokn_core.site import SiteSettings
+
+
+class SiteSettingsStore(Protocol):
+    async def load(self) -> SiteSettings: ...
+
+    async def save(self, settings: SiteSettings) -> None: ...
 
 
 @dataclass(slots=True)
@@ -40,6 +48,7 @@ class Console:
     clock: Clock
     settings: Settings
     templates: Jinja2Templates
+    site: SiteSettingsStore | None = None
     _static_versions: dict[str, str] = field(default_factory=dict)
 
     # -- rendering --------------------------------------------------------
@@ -54,11 +63,20 @@ class Console:
     ) -> Response:
         token = request.cookies.get(CSRF_COOKIE) or new_secret(32)
         flash = getattr(request.state, "flash", None)
+        site = getattr(request.state, "settings", None) or SiteSettings()
+        if template.startswith("public/") and not site.available:
+            status_code = 503
+            template = "layouts/maintenance.html"
+            context = {**context, "message": site.maintenance_message}
         body: dict[str, object] = {
             **context,
             "csrf_token": token,
-            "product": self.settings.product_name,
-            "support_email": self.settings.support_email,
+            "product": site.name,
+            "support_email": site.support_email,
+            "site": site,
+            "site_mark": site.mark,
+            "tagline": site.tagline,
+            "hero_body": site.hero_body,
             "flash": flash,
             "static_url": static_url,
             "domain": self.settings.domain,

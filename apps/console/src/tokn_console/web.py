@@ -151,3 +151,15 @@ def set_session_cookie(response: Response, raw: str, *, max_age: int, secure: bo
 
 def clear_session_cookie(response: Response, *, secure: bool) -> None:
     response.delete_cookie(COOKIE_NAME, path="/", secure=secure, httponly=True, samesite="lax")
+
+
+class SiteMiddleware(BaseHTTPMiddleware):
+    """Load the operator's settings once per request so render can read them."""
+
+    def __init__(self, app: ASGIApp, *, store: object) -> None:
+        super().__init__(app)
+        self._store = store
+
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
+        request.state.settings = await self._store.load()  # type: ignore[attr-defined]
+        return await call_next(request)

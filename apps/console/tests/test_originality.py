@@ -26,8 +26,19 @@ BANNED = (
     "tokens served on",
 )
 
-PUBLIC_PAGES = ("/", "/pricing", "/coding", "/coding/claude-code", "/docs", "/support",
-                "/status", "/privacy", "/terms", "/login", "/signup")
+PUBLIC_PAGES = (
+    "/",
+    "/pricing",
+    "/coding",
+    "/coding/claude-code",
+    "/docs",
+    "/support",
+    "/status",
+    "/privacy",
+    "/terms",
+    "/login",
+    "/signup",
+)
 
 
 @pytest.mark.parametrize("path", PUBLIC_PAGES)
