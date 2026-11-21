@@ -5,6 +5,8 @@
   <div class="shell nav__inner">
     <a class="nav__wordmark" href="/">{{ product }}</a>
     <nav class="nav__links" aria-label="Main">
+      <a class="nav__link" href="/coding" {% if page == 'coding' %}aria-current="page"{% endif %}>Coding</a>
+      <a class="nav__link" href="/pricing" {% if page == 'pricing' %}aria-current="page"{% endif %}>Pricing</a>
       <a class="nav__link" href="/docs" {% if page == 'docs' %}aria-current="page"{% endif %}>Docs</a>
       <a class="nav__link" href="/support" {% if page == 'support' %}aria-current="page"{% endif %}>Support</a>
       {% if session %}

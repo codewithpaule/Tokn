@@ -8,7 +8,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from fastapi import APIRouter, Request, Response
+from fastapi import APIRouter, HTTPException, Request, Response
+
+from tokn_console.content.tools import TOOLS, by_slug, config_rows
 
 if TYPE_CHECKING:
     from tokn_console.context import Console
@@ -128,6 +130,40 @@ def build_router(console: Console) -> APIRouter:
             updated="21 November 2026",
             sections=TERMS_SECTIONS,
             page="terms",
+        )
+
+    @router.get("/pricing")
+    async def pricing(request: Request) -> Response:
+        return console.render(request, "public/pricing.html", catalogue=(), page="pricing")
+
+    @router.get("/coding")
+    async def coding(request: Request) -> Response:
+        return console.render(
+            request,
+            "public/coding.html",
+            heading="Connect your agent",
+            lede="Four families, one key. Pick yours for the exact settings.",
+            tools=TOOLS,
+            tool=None,
+            page="coding",
+        )
+
+    @router.get("/coding/{slug}")
+    async def connect_guide(request: Request, slug: str) -> Response:
+        tool = by_slug(slug)
+        if tool is None:
+            raise HTTPException(status_code=404, detail="no such client")
+        return console.render(
+            request,
+            "public/coding.html",
+            heading=tool.name,
+            lede=tool.summary,
+            config=config_rows(tool, console.settings.domain),
+            steps=tool.steps,
+            limits=tool.limits,
+            tool=tool,
+            tools=TOOLS,
+            page="coding",
         )
 
     return router
