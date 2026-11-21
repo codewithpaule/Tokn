@@ -1,0 +1,20 @@
+{% extends "layouts/public.html" %}
+{% block title %}{{ heading }} — {{ product }}{% endblock %}
+{% block content %}
+<div class="shell page">
+  <div class="prose">
+    <h1>{{ heading }}</h1>
+    <p class="muted">Last updated {{ updated }}.</p>
+
+    {% for section in sections %}
+      <h2>{{ section.heading }}</h2>
+      {% for paragraph in section.paragraphs %}<p>{{ paragraph }}</p>{% endfor %}
+      {% if section.placeholder %}
+        <p class="banner banner--warning" role="status">Placeholder: this section needs legal review before launch.</p>
+      {% endif %}
+    {% endfor %}
+
+    <p class="hint">Questions about this page: <a href="mailto:{{ support_email }}">{{ support_email }}</a>.</p>
+  </div>
+</div>
+{% endblock %}

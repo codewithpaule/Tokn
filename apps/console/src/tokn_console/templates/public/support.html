@@ -1,0 +1,23 @@
+{% extends "layouts/public.html" %}
+{% block title %}Support — {{ product }}{% endblock %}
+{% block content %}
+<div class="shell page">
+  <div class="prose">
+    <h1>Support</h1>
+    <p class="muted">A person reads every message. Expect a reply within one working day.</p>
+
+    <h2>Email</h2>
+    <p><a href="mailto:{{ support_email }}">{{ support_email }}</a> — include your account email and, if a request failed, the request id from the response header.</p>
+
+    <h2>Before you write</h2>
+    <ul>
+      <li>A <span class="mono">401</span> usually means the key was revoked, expired or reached its cap. Check the key in the console.</li>
+      <li>A <span class="mono">402</span> means the wallet cannot cover the request. Top up and retry.</li>
+      <li>A <span class="mono">429</span> carries <span class="mono">Retry-After</span>. Wait that long and retry; nothing was charged.</li>
+    </ul>
+
+    <h2>Security</h2>
+    <p>Report a vulnerability to <a href="mailto:{{ support_email }}">{{ support_email }}</a> rather than in a public issue. We acknowledge reports within 72 hours.</p>
+  </div>
+</div>
+{% endblock %}

@@ -18,6 +18,8 @@ class Settings(BaseSettings):
     product_name: str = "Tokn"
     key_prefix: str = "tokn"
     key_environment: str = "live"
+    domain: str = "tokn.ng"
+    cli_available: bool = False
 
     session_secret: str = Field(default="dev-only-session-secret-change-me")
     key_pepper: str = Field(default="dev-only-pepper-change-me-please")

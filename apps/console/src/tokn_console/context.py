@@ -61,6 +61,8 @@ class Console:
             "support_email": self.settings.support_email,
             "flash": flash,
             "static_url": static_url,
+            "domain": self.settings.domain,
+            "cli_available": self.settings.cli_available,
             "session": getattr(request.state, "session", None),
         }
         response = self.templates.TemplateResponse(request, template, body, status_code=status_code)

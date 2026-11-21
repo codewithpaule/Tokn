@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from fastapi import APIRouter, Request, Response
+from fastapi import APIRouter, HTTPException, Request, Response
 from fastapi.responses import RedirectResponse
 
 if TYPE_CHECKING:
@@ -17,6 +17,13 @@ if TYPE_CHECKING:
 
 def build_router(console: Console) -> APIRouter:
     router = APIRouter()
+
+    @router.get("/__kit")
+    async def component_kit(request: Request) -> Response:
+        """Every component in every state. 404 outside development."""
+        if console.settings.env != "development":
+            raise HTTPException(status_code=404, detail="not found")
+        return console.render(request, "kit.html")
 
     # ------------------------------------------------------------------- app
 

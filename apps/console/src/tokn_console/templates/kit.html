@@ -1,0 +1,47 @@
+{% extends "layouts/public.html" %}
+{% from "components/ui.html" import button, field, banner, badge, spinner, empty_state, code_block %}
+
+{% block title %}Component kit — {{ product }}{% endblock %}
+{% block content %}
+<div class="shell page">
+  <h1>Component kit</h1>
+  <p class="muted">Development only. Every component, in every state.</p>
+
+  <h2>Buttons</h2>
+  <div class="row">
+    {{ button("Primary", "primary") }}
+    {{ button("Outline", "outline") }}
+    {{ button("Quiet", "quiet") }}
+    {{ button("Danger", "danger") }}
+    {{ button("Creating key…", "primary", loading=true) }}
+    {{ button("Disabled", "primary", disabled=true) }}
+  </div>
+
+  <h2>Fields</h2>
+  <div class="row">
+    {{ field("kit-email", "Email", type="email", hint="We only use this for receipts.", autocomplete="username") }}
+  </div>
+  {{ field("kit-name", "Key name", error="Give the key a name you will recognise later.") }}
+
+  <h2>Banners</h2>
+  {{ banner("Your wallet covers this request.", "info") }}
+  {{ banner("This key is used by a paused project.", "warning") }}
+  {{ banner("That code did not match. Try again.", "error") }}
+
+  <h2>Badges</h2>
+  <div class="row">
+    {{ badge("Active", "active") }}
+    {{ badge("Paused", "paused") }}
+    {{ badge("Revoked", "revoked") }}
+  </div>
+
+  <h2>Spinner</h2>
+  <div class="row">{{ spinner("Loading receipts") }} <span class="muted">Loading receipts…</span></div>
+
+  <h2>Empty state</h2>
+  {{ empty_state("No keys yet", "Create a key to connect an agent.") }}
+
+  <h2>Code block</h2>
+  {{ code_block("export OPENAI_BASE_URL=https://tokn.ng/v1") }}
+</div>
+{% endblock %}

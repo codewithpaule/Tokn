@@ -1,0 +1,146 @@
+{% extends "layouts/public.html" %}
+{% from "components/ui.html" import banner %}
+
+{% block title %}{{ product }} — pay per token in naira{% endblock %}
+{% block head %}
+  <meta name="description" content="One key, one naira wallet, every coding model. Requests are metered to the token and every one produces a receipt.">
+{% endblock %}
+
+{% block content %}
+<section class="shell hero">
+  <h1 class="hero__title">Keep Claude Code, Codex or OpenCode. Pay per token in naira.</h1>
+  <p class="hero__lede">
+    One key, one prepaid wallet, every model you already use. The gateway meters what you
+    spend to the token, and every request leaves a receipt you can check.
+  </p>
+  <div class="hero__actions">
+    <a class="button button--primary" href="/signup">Get API key</a>
+    <a class="button button--quiet" href="#how">How it works</a>
+  </div>
+</section>
+
+<section class="shell section" id="how">
+  <div class="section__head">
+    <h2 class="section__title">Connect a client you already have</h2>
+    <p class="section__lede">
+      The gateway speaks the OpenAI and Anthropic protocols. Point a client at it and keep
+      working; the only difference is where the tokens are billed.
+    </p>
+  </div>
+
+  <div class="install">
+    <div class="install__bar">
+      <span>Base URL and key</span>
+      <span class="mono">.env</span>
+    </div>
+    <pre class="code"><span class="code__prompt">$</span>export OPENAI_BASE_URL=https://{{ domain }}/v1
+<span class="code__prompt">$</span>export OPENAI_API_KEY=tokn_live_…</pre>
+  </div>
+  <ul class="install__checks">
+    <li>Your key, not ours</li>
+    <li>Receipts for every request</li>
+    <li>Hard spend caps per key</li>
+  </ul>
+
+  {% if cli_available %}
+    {{ banner("The Tokn CLI is available: tokn setup configures each client and backs up every file it touches.", "info") }}
+  {% else %}
+    {{ banner("The CLI is not published yet. Set the two variables above, or create a key and follow the connect steps in the console.", "info") }}
+  {% endif %}
+</section>
+
+<section class="shell section">
+  <div class="section__head">
+    <h2 class="section__title">What a request costs</h2>
+    <p class="section__lede">
+      Input, output and cached tokens are priced separately, per model, and the price that
+      applied is written on the receipt. Nothing is rounded in our favour beyond the last
+      micro-naira.
+    </p>
+  </div>
+
+  <div class="grid grid--three">
+    <div class="card">
+      <h3>Reserved before</h3>
+      <p>The worst case is held from your wallet before the request leaves us. If it does not fit, you get a clear 402 and nothing runs.</p>
+    </div>
+    <div class="card">
+      <h3>Measured after</h3>
+      <p>The rest of the hold is released and the real cost is charged, read from the provider's own token counts.</p>
+    </div>
+    <div class="card">
+      <h3>Recorded always</h3>
+      <p>Model, tokens in, out and cached, cost in naira, latency and outcome. Never the prompt, never the answer.</p>
+    </div>
+  </div>
+</section>
+
+<section class="shell section">
+  <div class="section__head">
+    <h2 class="section__title">Three steps</h2>
+  </div>
+  <div class="step">
+    <span class="step__number">01</span>
+    <div><h3>Create a key</h3><p>Sign up, confirm your email, enable two-factor and create a key. The secret is shown once.</p></div>
+  </div>
+  <div class="step">
+    <span class="step__number">02</span>
+    <div><h3>Connect an agent</h3><p>Set the base URL and the key in the client you already use. The console shows the exact lines for each one.</p></div>
+  </div>
+  <div class="step">
+    <span class="step__number">03</span>
+    <div><h3>Work</h3><p>Every request appears in Usage as a receipt with its cost. Top up when the balance runs low.</p></div>
+  </div>
+</section>
+
+<section class="shell section">
+  <div class="section__head">
+    <h2 class="section__title">What we store, and what we do not</h2>
+  </div>
+  <div class="grid grid--two">
+    <div class="card">
+      <h3>We store</h3>
+      <p>Your account, your keys as hashes, your wallet and ledger, and one receipt per request: model, tokens, cost, latency, outcome.</p>
+    </div>
+    <div class="card">
+      <h3>We do not store</h3>
+      <p>Prompts, completions, request bodies or authorisation headers. There is no setting to turn this back on, because there is nothing to turn on.</p>
+    </div>
+  </div>
+</section>
+
+<section class="shell section faq">
+  <div class="section__head">
+    <h2 class="section__title">Questions</h2>
+  </div>
+  <details>
+    <summary>Is this a subscription?</summary>
+    <p>No. You prepay in naira and spend it per token. Credit never expires, and there is no monthly minimum.</p>
+  </details>
+  <details>
+    <summary>Which models can I use?</summary>
+    <p>The catalogue lists real model names with their input, output and cache prices. If a model is not listed, it is not enabled.</p>
+  </details>
+  <details>
+    <summary>What happens if my balance runs out mid-request?</summary>
+    <p>It cannot. The worst case is held before the request starts, so a request either fits or is refused with a 402 before anything runs.</p>
+  </details>
+  <details>
+    <summary>Can I cap what a key spends?</summary>
+    <p>Yes. Each key can carry a spend cap and an expiry. When the cap is reached the key stops working; it does not overspend.</p>
+  </details>
+  <details>
+    <summary>Do you use my prompts to train anything?</summary>
+    <p>No. We do not store them, so there is nothing to train on.</p>
+  </details>
+  <details>
+    <summary>What if a request fails upstream?</summary>
+    <p>You are not charged. The hold is released in full, and the failed attempt is recorded with an upstream error outcome.</p>
+  </details>
+</section>
+
+<section class="shell closing">
+  <h2>Start with one key.</h2>
+  <a class="button button--primary" href="/signup">Get API key</a>
+</section>
+{% endblock %}

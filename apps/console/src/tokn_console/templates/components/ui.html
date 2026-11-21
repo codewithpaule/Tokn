@@ -1,0 +1,62 @@
+{#
+  Component macros. One definition each, used everywhere.
+
+  Every macro takes its content as arguments rather than caller blocks where possible, so
+  a template cannot accidentally inject markup that bypasses escaping.
+#}
+
+{#- Button: variants primary | outline | quiet | danger. States: default, loading, disabled. -#}
+{% macro button(label, variant="primary", type="submit", loading=false, disabled=false, name=none, value=none) -%}
+  <button type="{{ type }}"
+          class="button button--{{ variant }}"
+          {% if name %}name="{{ name }}"{% endif %}
+          {% if value %}value="{{ value }}"{% endif %}
+          {% if disabled %}disabled{% endif %}
+          {% if loading %}data-loading="true" aria-busy="true"{% endif %}>
+    {% if loading %}<span class="spinner" aria-hidden="true"></span>{% endif %}
+    <span>{{ label }}</span>
+  </button>
+{%- endmacro %}
+
+{#- Field: label above, optional hint, inline error wired with aria-describedby. -#}
+{% macro field(name, label, type="text", value="", hint=none, error=none, autocomplete=none, required=false) -%}
+  <div class="field">
+    <label for="{{ name }}">{{ label }}</label>
+    <input class="input" id="{{ name }}" name="{{ name }}" type="{{ type }}"
+           value="{{ value }}"
+           {% if autocomplete %}autocomplete="{{ autocomplete }}"{% endif %}
+           {% if required %}required{% endif %}
+           {% if error %}aria-invalid="true" aria-describedby="{{ name }}-error"{% endif %}>
+    {% if hint and not error %}<p class="hint" id="{{ name }}-hint">{{ hint }}</p>{% endif %}
+    {% if error %}<p class="field-error" id="{{ name }}-error">{{ error }}</p>{% endif %}
+  </div>
+{%- endmacro %}
+
+{#- Banner: kinds info | warning | error. Always has a role so it is announced. -#}
+{% macro banner(text, kind="info") -%}
+  <p class="banner banner--{{ kind }}" role="{{ 'alert' if kind == 'error' else 'status' }}">{{ text }}</p>
+{%- endmacro %}
+
+{#- Badge: always carries text, never colour alone. -#}
+{% macro badge(text, kind="active") -%}
+  <span class="badge badge--{{ kind }}">{{ text }}</span>
+{%- endmacro %}
+
+{#- Spinner: 16px, decorative. Pair with visible loading text. -#}
+{% macro spinner(label="Loading") -%}
+  <span class="spinner" role="img" aria-label="{{ label }}"></span>
+{%- endmacro %}
+
+{#- Empty state: heading, explanation and one action. -#}
+{% macro empty_state(heading, body) -%}
+  <div class="empty">
+    <h3>{{ heading }}</h3>
+    <p class="muted">{{ body }}</p>
+    {% if caller %}{{ caller() }}{% endif %}
+  </div>
+{%- endmacro %}
+
+{#- Code block: ink surface, paper text. Content is escaped; pass text, not markup. -#}
+{% macro code_block(text) -%}
+  <pre class="code"><code>{{ text }}</code></pre>
+{%- endmacro %}

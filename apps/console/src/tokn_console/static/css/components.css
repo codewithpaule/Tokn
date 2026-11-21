@@ -328,6 +328,17 @@ select:focus-visible {
   .toast { animation: none; }
 }
 
+/* -- empty state --------------------------------------------------------- */
+
+.empty {
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  padding: var(--s6);
+  text-align: left;
+}
+
+.empty h3 { font-size: var(--text-16); margin-bottom: var(--s1); }
+
 /* -- spinners and progress ---------------------------------------------- */
 
 .spinner {
