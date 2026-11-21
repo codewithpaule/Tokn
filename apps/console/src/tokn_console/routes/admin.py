@@ -8,10 +8,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from fastapi import APIRouter, Depends, Form, Request, Response
+from fastapi import APIRouter, Depends, Form, HTTPException, Request, Response
 from fastapi.responses import PlainTextResponse
 
 from tokn_console.web import require_csrf
+from tokn_core.auth.store import AccountRecord
 from tokn_core.site import FONTS, SiteSettings
 
 if TYPE_CHECKING:
@@ -30,6 +31,16 @@ TEXT_FIELDS = (
 def build_router(console: Console) -> APIRouter:
     router = APIRouter()
 
+    async def require_admin(request: Request) -> AccountRecord:
+        """Anonymous goes to sign in. Signed in without the flag gets a 404, so the
+        route does not confirm that it exists."""
+        account = await console.current_account(request)
+        if account is None:
+            raise HTTPException(status_code=303, headers={"location": "/login"})
+        if not account.is_admin:
+            raise HTTPException(status_code=404, detail="not found")
+        return account
+
     @router.get("/theme.css", include_in_schema=False)
     async def theme(request: Request) -> Response:
         settings: SiteSettings = request.state.settings
@@ -39,7 +50,7 @@ def build_router(console: Console) -> APIRouter:
             headers={"cache-control": "no-store"},
         )
 
-    @router.get("/admin/site")
+    @router.get("/admin/site", dependencies=[Depends(require_admin)])
     async def site_form(request: Request) -> Response:
         settings: SiteSettings = request.state.settings
         return console.render(
@@ -51,7 +62,7 @@ def build_router(console: Console) -> APIRouter:
             page="admin",
         )
 
-    @router.post("/admin/site", dependencies=[Depends(require_csrf)])
+    @router.post("/admin/site", dependencies=[Depends(require_csrf), Depends(require_admin)])
     async def site_save(
         request: Request,
         name: str = Form(""),

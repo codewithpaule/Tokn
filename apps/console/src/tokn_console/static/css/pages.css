@@ -176,7 +176,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-.faq details[open] summary::before { content: "–"; }
+.faq details[open] summary::before { content: "-"; }
 
 .faq p { margin: var(--s2) 0 0 28px; color: var(--muted); max-width: 64ch; }
 

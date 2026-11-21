@@ -19,7 +19,7 @@ PRIVACY_SECTIONS = [
     {
         "heading": "What we collect",
         "paragraphs": [
-            "Your email address, a hash of your password, and the keys you create — "
+            "Your email address, a hash of your password, and the keys you create, "
             "stored only as hashes.",
             "A ledger of every credit and charge, and one receipt per request: model, "
             "token counts, cost, latency and outcome.",

@@ -1,5 +1,5 @@
 {% extends "layouts/public.html" %}
-{% block title %}Docs — {{ product }}{% endblock %}
+{% block title %}Docs, {{ product }}{% endblock %}
 {% block content %}
 <div class="shell page">
   <div class="prose">
@@ -13,18 +13,18 @@
 
     <h2>Endpoints</h2>
     <ul>
-      <li><span class="mono">POST /v1/chat/completions</span> — OpenAI protocol, streaming and non-streaming.</li>
-      <li><span class="mono">POST /v1/messages</span> — Anthropic protocol, streaming.</li>
-      <li><span class="mono">GET /v1/models</span> — the models enabled for your account.</li>
+      <li><span class="mono">POST /v1/chat/completions</span>, OpenAI protocol, streaming and non-streaming.</li>
+      <li><span class="mono">POST /v1/messages</span>, Anthropic protocol, streaming.</li>
+      <li><span class="mono">GET /v1/models</span>, the models enabled for your account.</li>
     </ul>
 
     <h2>Errors</h2>
     <ul>
-      <li><span class="mono">401</span> — the key is missing, malformed, revoked, expired or over its cap.</li>
-      <li><span class="mono">402</span> — your wallet cannot cover the request. Top up to continue.</li>
-      <li><span class="mono">403</span> — the key lacks the scope, or is not allowed from this address.</li>
-      <li><span class="mono">429</span> — rate limit or concurrency cap. The response carries <span class="mono">Retry-After</span>.</li>
-      <li><span class="mono">502</span> — the upstream failed before responding. Nothing was charged.</li>
+      <li><span class="mono">401</span>, the key is missing, malformed, revoked, expired or over its cap.</li>
+      <li><span class="mono">402</span>, your wallet cannot cover the request. Top up to continue.</li>
+      <li><span class="mono">403</span>, the key lacks the scope, or is not allowed from this address.</li>
+      <li><span class="mono">429</span>, rate limit or concurrency cap. The response carries <span class="mono">Retry-After</span>.</li>
+      <li><span class="mono">502</span>, the upstream failed before responding. Nothing was charged.</li>
     </ul>
 
     <h2>What a request does</h2>

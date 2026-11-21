@@ -129,6 +129,10 @@ class InMemoryAuthStore:
     async def enqueue_email(self, to: str, subject: str, body: str) -> None:
         self.emails.append((to, subject, body))
 
+    async def make_admin(self, account_id: str, value: bool = True) -> None:
+        """Local development and tests only: promote an account."""
+        await self._update(account_id, is_admin=value)
+
     def token_for(self, kind: TokenKind) -> str | None:
         """Test helper: the most recent raw digest of a kind, for asserting single use."""
         for digest, token in self._tokens.items():

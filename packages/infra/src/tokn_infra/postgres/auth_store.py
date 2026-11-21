@@ -212,6 +212,7 @@ def _to_record(account: Account, recovery_digests: tuple[str, ...]) -> AccountRe
         ),
         status=account.status,
         recovery_code_digests=recovery_digests,
+        is_admin=bool(getattr(account, "is_admin", False)),
     )
 
 

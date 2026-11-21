@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, Request
-from fastapi.responses import Response
+from fastapi.responses import RedirectResponse, Response
 from sqlalchemy.ext.asyncio import AsyncEngine
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.templating import Jinja2Templates
@@ -141,6 +141,9 @@ def create_app(
     @app.exception_handler(StarletteHTTPException)
     async def http_error(request: Request, exc: StarletteHTTPException) -> Response:
         request_id = getattr(request.state, "request_id", uuid.uuid4().hex)
+        location = (exc.headers or {}).get("location")
+        if 300 <= exc.status_code < 400 and location:
+            return RedirectResponse(location, status_code=exc.status_code)
         if request.headers.get("hx-request") == "true":
             return Response(
                 status_code=exc.status_code,

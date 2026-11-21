@@ -27,6 +27,7 @@ class AccountRecord:
     totp_secret: str | None = None
     status: str = ACCOUNT_PENDING
     recovery_code_digests: tuple[str, ...] = field(default=())
+    is_admin: bool = False
 
     @property
     def can_log_in(self) -> bool:
