@@ -100,5 +100,5 @@ async def test_the_enrolment_uri_is_scannable(harness: Harness) -> None:
     page = await harness.client.get("/app/2fa")
 
     assert "otpauth://totp/" in page.text
-    assert "issuer=Tokn" in page.text
+    assert "issuer=Brewkeg" in page.text
     assert STRONG not in page.text

@@ -19,17 +19,17 @@
 
 :root {
   /* colour */
-  --ink: #0e1210;
-  --paper: #fbfbf8;
-  --surface: #ffffff;
-  --line: #e3e6e0;
-  --line-strong: #cdd2cb;
-  --muted: #5a625d;
-  --green: #1e6b4b;
-  --green-deep: #154d36;
-  --green-tint: #e7f0ea;
-  --yellow: #e3b93c;
-  --yellow-tint: #faf3da;
+  --ink: #14110e;
+  --paper: #fbf9f3;
+  --surface: #fffdf8;
+  --line: #e7e2d5;
+  --line-strong: #d3ccb9;
+  --muted: #5d5a52;
+  --green: #1f6b4a;
+  --green-deep: #17513a;
+  --green-tint: #e6efe8;
+  --yellow: #c2703e;
+  --yellow-tint: #f7ebdf;
   --danger: #a33a2c;
   --danger-tint: #f7e9e6;
 

@@ -1,0 +1,76 @@
+# brewkeg
+
+> An API gateway for Claude, GPT and open-weight models. Metered per token,
+> billed in Naira or USD. Pay only for what you use; top-up credit never
+> expires.
+
+Every price and model id below is rendered from the same catalog the billing
+code reads, so it cannot drift from what the API will actually accept.
+
+## API
+
+- Base URL: `https://brewkeg.dev`
+- Auth: `Authorization: Bearer bk_live_<key>`
+- Anthropic Messages: `POST /v1/messages`
+- OpenAI Responses: `POST /v1/responses` (takes `input` and
+  `max_output_tokens`, not `messages` and `max_tokens`)
+- OpenAI Chat Completions: `POST /v1/chat/completions`
+- Model discovery: `GET /v1/models` — no auth
+- Health: `GET /api/health` · Plans: `GET /api/plans`
+
+An unknown model id returns `400 model_not_supported` and is not billed. The
+response body lists the ids that are accepted.
+
+## Models
+
+| Model id | Credit | Input /MTok | Output /MTok | Cache read | vs vendor list | Minimum plan |
+|---|---|---|---|---|---|---|
+| `claude-opus-5-5` | 2x | $3 | $15 | $0.30 | — | Pro Max |
+| `claude-sonnet-5-5` | 1x | $0.60 | $3 | $0.06 | — | any |
+| `claude-haiku-4-5` | 0.85x | $0.16 | $0.80 | $0.02 | — | any |
+| `brewkeg-free` | 0x | $0 | $0 | $0 | — | any |
+| `brewkeg-test` | 1x | $0 | $0 | $0 | — | any |
+
+Prices are per million tokens. Cache read is a repeated prompt prefix; cache
+write is a first-time write of that prefix. For most workloads start with
+`claude-sonnet-5-5`; `claude-opus-5-5` costs more per token and is for harder
+work.
+
+**Credit** is the weight one call costs against a plan's monthly token budget.
+A 2x model burns twice the quota of a 1x one, so pick the cheapest model that
+does the job. **Minimum plan** is the lowest plan that carries that model;
+calling it on a cheaper plan returns `400 model_not_in_plan` before any tokens
+are spent. Full table: <https://brewkeg.dev/model-access>.
+
+One more is available and is not in the table: `uncensored-1` needs an
+explicit account opt-in and bills at 2× credit.
+
+## Billing
+
+- Metered per token. Subscriptions pre-buy a monthly token budget and use
+  it first; PAYGo top-up credit covers the rest and never expires.
+- Top-up credit never expires; it carries forward and survives plan changes.
+- Subscriptions are optional and pre-buy a monthly token budget. Current plan
+  prices: <https://brewkeg.dev/pricing>
+- `input + output + cacheWrite` at the rates above, plus `cacheRead` at its
+  own lower rate.
+- Payment: NGN (card, bank transfer, USSD, QR) or USD (card), via Paystack.
+
+## Optional
+
+- <https://brewkeg.dev/docs> — quick start, auth, request shapes, SDK snippets
+- <https://brewkeg.dev/docs> — SDK snippets (Node, Python, Go, cURL) under #api-reference
+- <https://brewkeg.dev/docs/cascade> — JEV-verified cascade recipe: draft cheap, verify, escalate only failures
+- <https://brewkeg.dev/coding/opencode>, <https://brewkeg.dev/coding/cursor>, <https://brewkeg.dev/coding/copilot>,
+  <https://brewkeg.dev/coding/cline>, <https://brewkeg.dev/coding/aider>, <https://brewkeg.dev/coding/continue>,
+  <https://brewkeg.dev/coding/librechat> — per-tool setup and env vars
+- <https://brewkeg.dev/connect> — one-command setup for every coding agent, plus plans
+- <https://brewkeg.dev/coding> — the price argument: what a plan month buys versus the same
+  money spent as pay-as-you-go
+- <https://brewkeg.dev/pricing> — plans and PAYGo rates
+- <https://brewkeg.dev/compare> — PAYGo versus vendor subscriptions
+- <https://brewkeg.dev/providers> — supply inference capacity, get paid
+- <https://brewkeg.dev/status> — live gateway health
+- <https://brewkeg.dev/support> — support
+
+Support: support@brewkeg.dev

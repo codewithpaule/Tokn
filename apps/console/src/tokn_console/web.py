@@ -51,12 +51,16 @@ class RequestIdMiddleware(BaseHTTPMiddleware):
 
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
-    def __init__(self, app: ASGIApp, *, hsts: bool) -> None:
+    def __init__(self, app: ASGIApp, *, hsts: bool, exempt_prefixes: tuple[str, ...] = ()) -> None:
         super().__init__(app)
         self._hsts = hsts
+        self._exempt = exempt_prefixes
 
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         response = await call_next(request)
+        path = request.url.path
+        if any(path.startswith(prefix) for prefix in self._exempt):
+            return response
         for name, value in SECURITY_HEADERS.items():
             response.headers.setdefault(name, value)
         if self._hsts:

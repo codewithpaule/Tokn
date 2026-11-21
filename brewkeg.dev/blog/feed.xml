@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>brewkeg blog</title>
+    <link>https://brewkeg.dev/blog</link>
+    <description>Notes on PAYG AI inference, NGN billing, Claude Code / Codex on brewkeg, and per-token economics.</description>
+    <language>en</language>
+    <lastBuildDate>Fri, 20 Nov 2026 00:00:00 GMT</lastBuildDate>
+    <atom:link href="https://brewkeg.dev/blog/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+<title>How to make motion graphics with Claude Code (no After Effects)</title>
+<link>https://brewkeg.dev/blog/motion-graphics-with-claude-code</link>
+<guid isPermaLink="true">https://brewkeg.dev/blog/motion-graphics-with-claude-code</guid>
+<pubDate>Fri, 20 Nov 2026 00:00:00 GMT</pubDate>
+<description>One HTML file, a browser and a prompt. The rules that separate a loop people watch from a loop that stutters, plus example loops and a render workflow.</description>
+</item>
+<item>
+<title>We can&apos;t keep selling you Opus at ₦7,000 ($5), so we cut a deal to keep it yours</title>
+<link>https://brewkeg.dev/blog/our-own-model-lineup</link>
+<guid isPermaLink="true">https://brewkeg.dev/blog/our-own-model-lineup</guid>
+<pubDate>Sun, 08 Nov 2026 00:00:00 GMT</pubDate>
+<description>Reselling Opus at ₦7,000 ($5) was going to break us. So we signed a new deal: the same Opus-class brain under our own names, pay as you go, credit that never expires.</description>
+</item>
+<item>
+<title>The string &quot;claude opus 5 5&quot; is already inside Anthropic&apos;s website</title>
+<link>https://brewkeg.dev/blog/claude-opus-5-5-appears-in-anthropic-source</link>
+<guid isPermaLink="true">https://brewkeg.dev/blog/claude-opus-5-5-appears-in-anthropic-source</guid>
+<pubDate>Tue, 22 Sep 2026 00:00:00 GMT</pubDate>
+<description>A staged model identifier on Anthropic&apos;s own news page, a Polymarket contract at 75 percent, and a rumored 30 to 50 percent price cut. What the signals say about the next 48 hours.</description>
+</item>
+<item>
+<title>GPT 6 Sol is supposedly dropping this week. Here is what is actually known.</title>
+<link>https://brewkeg.dev/blog/gpt-6-sol-rumor-week-anthropic-claude-opus-5-5</link>
+<guid isPermaLink="true">https://brewkeg.dev/blog/gpt-6-sol-rumor-week-anthropic-claude-opus-5-5</guid>
+<pubDate>Tue, 22 Sep 2026 00:00:00 GMT</pubDate>
+<description>OpenAI and Anthropic are rumored to ship new flagships within hours of each other, with at least one personal agent platform following before DevDay on September 29. A clean read of what is rumor, what is leak, and what is shipping.</description>
+</item>
+<item>
+<title>OpenAI quietly removed Ultrafast from gpt 5.6 sol in Codex. That is not nothing.</title>
+<link>https://brewkeg.dev/blog/openai-removed-ultrafast-from-codex-what-it-means</link>
+<guid isPermaLink="true">https://brewkeg.dev/blog/openai-removed-ultrafast-from-codex-what-it-means</guid>
+<pubDate>Tue, 22 Sep 2026 00:00:00 GMT</pubDate>
+<description>The fastest tier in the Codex picker vanished this week, on the eve of DevDay. The most plausible read is that GPT 6 Sol ships with Ultrafast as the default, and 750 tokens a second becomes the new normal.</description>
+</item>
+<item>
+<title>Why brewkeg is metered, not subscription</title>
+<link>https://brewkeg.dev/blog/payg-not-subscriptions</link>
+<guid isPermaLink="true">https://brewkeg.dev/blog/payg-not-subscriptions</guid>
+<pubDate>Tue, 22 Sep 2026 00:00:00 GMT</pubDate>
+<description>A monthly quota that expires unused is pure waste. brewkeg is pay-as-you-go, in your currency, and credit never expires.</description>
+</item>
+<item>
+<title>Three labs are about to ship always on AI agents at the same time</title>
+<link>https://brewkeg.dev/blog/personal-agents-wave-aeon-grok-bot-muse</link>
+<guid isPermaLink="true">https://brewkeg.dev/blog/personal-agents-wave-aeon-grok-bot-muse</guid>
+<pubDate>Tue, 22 Sep 2026 00:00:00 GMT</pubDate>
+<description>SpaceXAI shipped Grok Bot in August, Meta shipped Muse in early September, and OpenAI&apos;s Aeon is rumored for before DevDay on September 29. The product category is real, the billing math is different, and brewkeg has to think about what this means for the gateway surface.</description>
+</item>
+<item>
+<title>Xiaomi just open sourced a model that lands in the same tier as Claude Opus 5</title>
+<link>https://brewkeg.dev/blog/xiaomi-mimo-v2-6-pro-open-weights-frontier</link>
+<guid isPermaLink="true">https://brewkeg.dev/blog/xiaomi-mimo-v2-6-pro-open-weights-frontier</guid>
+<pubDate>Tue, 22 Sep 2026 00:00:00 GMT</pubDate>
+<description>MiMo V2.6 Pro scored 46 on the AA Intelligence Index, runs at 125 tokens a second, and costs $0.87 per million output tokens under an MIT license. The frontier is wider than you think.</description>
+</item>
+  </channel>
+</rss>

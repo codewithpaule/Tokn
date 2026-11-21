@@ -11,11 +11,13 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
+from urllib.parse import unquote
 
-from fastapi import FastAPI, Request
-from fastapi.responses import RedirectResponse, Response
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import FileResponse, RedirectResponse, Response
 from sqlalchemy.ext.asyncio import AsyncEngine
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
 
 from tokn_console.config import Settings
@@ -48,12 +50,47 @@ from tokn_infra.site_store import InMemorySiteSettings, PostgresSiteSettings
 PACKAGE_ROOT = Path(__file__).resolve().parent
 TEMPLATES = PACKAGE_ROOT / "templates"
 STATIC = PACKAGE_ROOT / "static"
+REPO_ROOT = PACKAGE_ROOT.parents[3]
+SITE = REPO_ROOT / "brewkeg.dev"
 
 ERROR_COPY = {
     403: ("Not allowed", "This account cannot do that."),
     404: ("Page not found", "That page does not exist, or it has moved."),
     500: ("Something went wrong", "Nothing was charged. Try again in a moment."),
 }
+
+
+def _mount_site(app: FastAPI) -> None:
+    """Serve the design folder, including the clean URLs it links to."""
+    if not SITE.is_dir():
+        return
+
+    @app.get("/_next/image", include_in_schema=False)
+    async def next_image(url: str = "") -> Response:
+        """The mirror lost Next's optimiser, so point at the original asset.
+
+        The query is percent encoded (``%2Fbrand%2Ficon.png``) and the mirror dropped
+        some brand files, so fall back to the icon that did survive.
+        """
+        wanted = unquote(url).lstrip("/")
+        if (SITE / wanted).is_file():
+            return RedirectResponse(f"/{wanted}")
+        for fallback in ("icon-192.png", "icon-512.png"):
+            if (SITE / fallback).is_file():
+                return RedirectResponse(f"/{fallback}")
+        raise HTTPException(status_code=404)
+
+    @app.get("/{page}", include_in_schema=False)
+    async def flat_page(page: str) -> Response:
+        candidate = SITE / f"{page}.html"
+        if candidate.is_file():
+            return FileResponse(candidate, media_type="text/html")
+        asset = SITE / page
+        if asset.is_file():
+            return FileResponse(asset)
+        raise HTTPException(status_code=404)
+
+    app.mount("/", StaticFiles(directory=str(SITE), html=True), name="site")
 
 
 def create_app(
@@ -109,7 +146,11 @@ def create_app(
     app.add_middleware(FlashMiddleware, settings=resolved)
     app.add_middleware(SiteMiddleware, store=site_store)
     app.add_middleware(SessionMiddleware, store=store, pepper=resolved.session_secret, clock=clock)
-    app.add_middleware(SecurityHeadersMiddleware, hsts=resolved.enforce_https)
+    app.add_middleware(
+        SecurityHeadersMiddleware,
+        hsts=resolved.enforce_https,
+        exempt_prefixes=("/_next", "/avatars", "/brand", "/images", "/fonts"),
+    )
     app.add_middleware(RequestIdMiddleware)
     app.mount("/static", HashedStaticFiles(directory=str(STATIC)), name="static")
     console = Console(
@@ -162,4 +203,5 @@ def create_app(
     async def healthz() -> dict[str, str]:
         return {"status": "ok"}
 
+    _mount_site(app)
     return app

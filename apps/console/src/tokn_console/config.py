@@ -14,11 +14,11 @@ class Settings(BaseSettings):
     env: str = "development"
     base_url: str = "http://localhost:8080"
     console_url: str = "http://localhost:8081"
-    support_email: str = "support@tokn.ng"
-    product_name: str = "Tokn"
+    support_email: str = "support@brewkeg.dev"
+    product_name: str = "Brewkeg"
     key_prefix: str = "tokn"
     key_environment: str = "live"
-    domain: str = "tokn.ng"
+    domain: str = "brewkeg.dev"
     cli_available: bool = False
 
     session_secret: str = Field(default="dev-only-session-secret-change-me")

@@ -26,20 +26,20 @@ class SiteSettings:
     available: bool = True
     maintenance_message: str = "We are making a change. Back shortly."
 
-    name: str = "Tokn"
+    name: str = "Brewkeg"
     mark: str = "T"
     tagline: str = "Your coding agent. Paid by the token."
     hero_body: str = (
         "Point the agent you already use at one key. Pay in naira for what you use, see a "
         "receipt for every request, and keep any credit you do not spend."
     )
-    support_email: str = "support@tokn.ng"
+    support_email: str = "support@brewkeg.dev"
 
-    color_ink: str = "#0e1210"
-    color_paper: str = "#fbfbf8"
-    color_accent: str = "#1e6b4b"
-    color_accent_deep: str = "#154d36"
-    color_highlight: str = "#e3b93c"
+    color_ink: str = "#14110E"
+    color_paper: str = "#FBF9F3"
+    color_accent: str = "#1F6B4A"
+    color_accent_deep: str = "#17513A"
+    color_highlight: str = "#C2703E"
     font: str = "montserrat"
 
     def validated(self) -> SiteSettings:

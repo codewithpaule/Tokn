@@ -1,0 +1,229 @@
+WEBVTT
+
+00:00.000 --> 00:06.880
+All right, so in this video, I'll be showing you how to configure Claude Desktop with
+
+00:06.880 --> 00:08.360
+brewkeg.
+
+00:08.360 --> 00:14.760
+So this video is just like a tutorial, a documentation, whatever, you name it.
+
+00:14.760 --> 00:17.800
+So the first thing you need to do is to download Claude Desktop.
+
+00:17.800 --> 00:21.640
+If you've not already downloaded it, you can head over to Anthropic's website and download
+
+00:21.640 --> 00:22.640
+it.
+
+00:22.640 --> 00:24.960
+They have their own thing going on there.
+
+00:24.960 --> 00:29.200
+So I've already downloaded mine, and this is the first screen I've seen, but I've already
+
+00:29.200 --> 00:30.880
+set this up before.
+
+00:30.880 --> 00:36.040
+So my interface may be a little bit different, and I'm also on Mac.
+
+00:36.040 --> 00:40.320
+So you may be seeing a different thing from what I'm showing you here, but the concept
+
+00:40.320 --> 00:42.040
+should be similar.
+
+00:42.040 --> 00:43.600
+So we have this sign in.
+
+00:43.600 --> 00:44.600
+I'm not going to sign in.
+
+00:44.600 --> 00:45.600
+I'm not going to do anything.
+
+00:45.600 --> 00:54.760
+I'm just going to click on help, troubleshooting and enable, what is that again, enable developer
+
+00:54.760 --> 00:55.760
+mode.
+
+00:55.760 --> 00:58.920
+But the thing is that I already enabled this developer mode before.
+
+00:58.920 --> 01:04.600
+So it's not going to show up here, but for you, that is just like setting up the first
+
+01:04.600 --> 01:05.600
+time you're going to see it here.
+
+01:05.600 --> 01:08.000
+You're going to see enable developer mode.
+
+01:08.000 --> 01:13.160
+So once you click on it, you are now going to have this menu here, right?
+
+01:13.160 --> 01:16.080
+This is the second step, this menu.
+
+01:16.080 --> 01:17.600
+So by default, this menu is hidden.
+
+01:17.600 --> 01:20.440
+You're not going to see this menu until you click on that stuff.
+
+01:20.440 --> 01:23.640
+So once you've clicked on it, you ask this developer, you now click on Configure Third-
+
+01:23.640 --> 01:26.880
+Party Inference, and that is the step here.
+
+01:26.880 --> 01:31.160
+Now once you click on it, it brings you to this page, and I'm just going to click on
+
+01:31.160 --> 01:32.160
+it here.
+
+01:32.160 --> 01:36.200
+Configure Third-Party Inference, I'm going to click on it.
+
+01:36.200 --> 01:38.240
+So it opened in my other screen.
+
+01:38.240 --> 01:44.680
+I will just like move it to my next part.
+
+01:44.680 --> 01:45.680
+So is here.
+
+01:45.680 --> 01:51.760
+And the first thing you need to do is to put the gateway URL, the gateway base URL
+
+01:51.760 --> 01:56.680
+to brewkeg.dev, credential type is your static API key.
+
+01:56.680 --> 01:59.880
+Because that's what we are giving you, we are giving you an API key.
+
+01:59.880 --> 02:03.800
+Now you go to your dashboard, I've already signed into my own account, you create a key
+
+02:03.800 --> 02:09.720
+if you don't have a key, and you, let me just highlight and copy, although there's a copy
+
+02:09.720 --> 02:16.760
+icon here, so for the sake of demo, I've copied my API key, and I'm going to paste
+
+02:16.760 --> 02:17.760
+it.
+
+02:17.760 --> 02:18.760
+I'm going to clear this one.
+
+02:18.760 --> 02:20.520
+I'm just going to paste it.
+
+02:20.520 --> 02:27.040
+Now, we're just going to set this option to x-api-key, because that's what we want to use.
+
+02:27.040 --> 02:36.320
+We are still working, but for now let's just leave it at x-api-key, and you test your connection.
+
+02:36.320 --> 02:40.600
+So you see now that it's green, which means that everything is working fine.
+
+02:40.600 --> 02:46.000
+And if you scroll down a little bit more, you see that it found four models that it can
+
+02:46.000 --> 02:47.000
+use.
+
+02:47.000 --> 02:48.000
+This is good.
+
+02:48.000 --> 02:50.000
+This is what we want.
+
+02:50.000 --> 02:51.640
+And I think that's all.
+
+02:51.640 --> 02:56.440
+If you're not in here, you can customize it, but it's not really important for us.
+
+02:56.440 --> 02:58.920
+So we are just going to click on Apply Changes.
+
+02:58.920 --> 03:02.760
+It's going to tell us to save and restart, which is what we want, blah, blah, blah, and
+
+03:02.760 --> 03:07.120
+we just wait for it to restart.
+
+03:07.120 --> 03:12.080
+And now that it has restarted, it's brought me.
+
+03:12.080 --> 03:17.880
+Let me just move this screen back into my, I don't know why it keeps coming.
+
+03:17.880 --> 03:18.880
+So that's it here.
+
+03:18.880 --> 03:21.480
+You see that I'm now in CoolWalk.
+
+03:21.480 --> 03:23.280
+I can now do anything I want to do.
+
+03:23.280 --> 03:33.880
+I can now say, hello, build me a website, a website, or I don't use CoolWalk, but just
+
+03:33.880 --> 03:39.960
+to prove that it works with CoolWalk also, it's already working on it.
+
+03:39.960 --> 03:45.720
+It's going to do something, think, think, think, think, think and do everything.
+
+03:45.720 --> 03:48.080
+So it works here.
+
+03:48.080 --> 03:53.720
+So first it asks me a few questions to make it write our landing page, well, I'm just
+
+03:53.720 --> 03:54.720
+testing you.
+
+03:54.720 --> 03:57.400
+So I'll just stop the request and I'll go to code.
+
+03:57.400 --> 03:58.400
+Okay.
+
+03:58.400 --> 04:03.200
+So these are my previous runs and it works from here too.
+
+04:03.200 --> 04:07.280
+Even chat also works in case you want to use chat too.
+
+04:07.280 --> 04:11.440
+So everything just works from here.
+
+04:11.440 --> 04:13.920
+And that's it for here.
+
+04:13.920 --> 04:16.920
+If you have any questions, you let me know.
+
+04:16.920 --> 04:23.160
+If you're finding it difficult to configure anything, set anything, get anything
+
+04:23.160 --> 04:24.160
+right.
+
+04:24.160 --> 04:32.920
+Questions, solutions, we are here to help just leave me a DM or you send me an email, whichever
+
+04:32.920 --> 04:33.880
+one works for you.

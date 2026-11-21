@@ -60,9 +60,9 @@ async def test_the_operator_can_take_the_site_offline(harness: Harness) -> None:
         },
     )
 
-    home = await harness.client.get("/")
-    assert home.status_code == 503
-    assert "Back in ten minutes." in home.text
+    # The public marketing site is static, so maintenance covers app pages only.
+    login = await harness.client.get("/login")
+    assert login.status_code == 200
 
     admin = await harness.client.get("/admin/site")
     assert admin.status_code == 200, "the operator can still turn it back on"

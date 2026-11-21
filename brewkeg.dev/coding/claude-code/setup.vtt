@@ -1,0 +1,325 @@
+WEBVTT
+
+00:01.000 --> 00:04.160
+All right, so since we've learned how to configure
+
+00:04.160 --> 00:07.760
+and make Claude Desktop work with brewkeg,
+
+00:07.760 --> 00:12.480
+the next thing we need to do is how to configure brewkeg
+
+00:12.480 --> 00:13.560
+with Claude CLI.
+
+00:13.560 --> 00:15.240
+So I'm just going to be closing this window.
+
+00:15.240 --> 00:18.280
+I'm going to split the right pane that's half of the window.
+
+00:18.280 --> 00:22.680
+And this is the marketing page for Claude Code.
+
+00:22.680 --> 00:23.800
+This is how it works.
+
+00:23.800 --> 00:26.160
+But we don't want to use this one
+
+00:26.160 --> 00:28.680
+because we want the changes to be permanent.
+
+00:28.680 --> 00:33.080
+So .claude, this thing, there's
+
+00:33.080 --> 00:35.760
+what we call the config, like claude config or something
+
+00:35.760 --> 00:36.080
+like that.
+
+00:36.080 --> 00:38.040
+It's hidden, it's in your home directory.
+
+00:38.040 --> 00:39.560
+Like you don't see it if it's hidden or not,
+
+00:39.560 --> 00:41.640
+but that's just how hidden files work.
+
+00:41.640 --> 00:45.920
+So the first thing we need to do is to edit that file.
+
+00:45.920 --> 00:47.240
+And where can we find it?
+
+00:47.240 --> 00:52.320
+You can find it in the home directory of your machine.
+
+00:52.320 --> 00:54.080
+And once again, I'm on Mac.
+
+00:54.080 --> 00:56.840
+And since I'm on Mac, my interface
+
+00:56.880 --> 00:59.480
+is going to be different, but it's the same concept.
+
+00:59.480 --> 01:01.280
+And if you're wondering what this window is,
+
+01:01.280 --> 01:04.640
+this is Warp — warp.dev.
+
+01:04.640 --> 01:09.280
+You can use your normal terminal, your PowerShell,
+
+01:09.280 --> 01:11.040
+your CMD, whatever, anything that
+
+01:11.040 --> 01:13.320
+gives you something like this.
+
+01:13.320 --> 01:24.960
+So I'm going to open my ~/.claude/settings.json.
+
+01:24.960 --> 01:29.240
+I'm going to open this file in VS Code, the editor.
+
+01:29.240 --> 01:33.000
+So these are the two things that we need to bear in mind.
+
+01:33.000 --> 01:36.520
+The base URL and the authentication token.
+
+01:36.520 --> 01:39.680
+Now, if I just open claude without these two things,
+
+01:39.680 --> 01:42.400
+it's going to tell me to log in.
+
+01:42.400 --> 01:45.440
+So let me get rid of these two environment variables
+
+01:45.440 --> 01:49.600
+and try to open claude.
+
+01:49.600 --> 01:51.240
+It's going to tell me to trust this folder.
+
+01:51.240 --> 01:53.680
+If I say something like, hello?
+
+01:53.720 --> 01:55.240
+It's going to tell me to log in, right?
+
+01:55.240 --> 01:56.880
+So we don't want to log into claude
+
+01:56.880 --> 01:59.640
+because we have a brewkeg account.
+
+01:59.640 --> 02:02.120
+So I'm just going to exit it.
+
+02:02.120 --> 02:05.320
+I'm going to head back to this file.
+
+02:05.320 --> 02:09.160
+And our Anthropic base URL is going to point to brewkeg.dev.
+
+02:09.160 --> 02:12.920
+My API key is also going to be my API key that I've gotten
+
+02:12.920 --> 02:14.960
+from my dashboard.
+
+02:14.960 --> 02:17.640
+So I'm just going to copy it into this field.
+
+02:17.640 --> 02:20.600
+So I'm going to edit this one out.
+
+02:20.640 --> 02:24.800
+And these are the two variables that you want to deal with.
+
+02:24.800 --> 02:26.920
+They are the two most important things,
+
+02:26.920 --> 02:30.000
+like line number three and line number four.
+
+02:30.000 --> 02:31.640
+You don't need anything else.
+
+02:31.640 --> 02:34.280
+This other thing here, these are just like my,
+
+02:34.280 --> 02:35.920
+they were added by Claude Code itself.
+
+02:35.920 --> 02:39.360
+So once we have this thing working here,
+
+02:39.360 --> 02:42.680
+it does all of this to your endpoint
+
+02:42.680 --> 02:44.160
+on your own token.
+
+02:44.160 --> 02:47.040
+And now when I open claude again,
+
+02:47.040 --> 02:48.760
+when I ask it a question,
+
+02:48.760 --> 02:52.920
+what should — I'm going to say, build me a website?
+
+02:52.920 --> 02:54.280
+Which is a big ask.
+
+02:54.280 --> 02:56.240
+So you get the idea.
+
+02:56.240 --> 02:59.040
+You'll see that it starts working.
+
+02:59.040 --> 03:01.120
+I think my network is a little bit poor.
+
+03:01.120 --> 03:03.920
+And I'm just going to wait for it for some time.
+
+03:05.560 --> 03:07.000
+So it's thinking.
+
+03:08.800 --> 03:11.400
+I can see that it says thinking.
+
+03:11.400 --> 03:15.160
+It's trying to figure out what I mean by build me a website.
+
+03:15.160 --> 03:16.720
+So wait for it to load.
+
+03:16.720 --> 03:17.880
+So it's just working.
+
+03:17.880 --> 03:19.840
+So you can just use your Claude CLI
+
+03:19.840 --> 03:21.280
+the way you used to use it.
+
+03:21.280 --> 03:23.360
+Nothing else, nothing more.
+
+03:23.360 --> 03:24.640
+Nothing less, nothing more.
+
+03:24.640 --> 03:26.320
+It's just it.
+
+03:26.320 --> 03:27.960
+And to prove it's working too,
+
+03:29.080 --> 03:31.080
+let's just go to our request page.
+
+03:33.920 --> 03:36.360
+Yeah, I think my network is busted.
+
+03:36.360 --> 03:38.400
+So in my request page, you see my tokens,
+
+03:38.400 --> 03:39.880
+you see the request that I've made.
+
+03:39.880 --> 03:43.840
+You see my cache read here or my cache read here.
+
+03:43.840 --> 03:46.520
+My input, my cache read and everything
+
+03:46.520 --> 03:48.520
+is written right here.
+
+03:48.520 --> 03:52.600
+So it asks me a similar question to what Claude Desktop
+
+03:52.600 --> 03:54.880
+also asked — a website, an app, a game.
+
+03:54.880 --> 03:57.120
+Like what do I want to build?
+
+03:57.120 --> 03:58.640
+So that's all.
+
+03:58.640 --> 04:00.720
+And you can select the model
+
+04:00.720 --> 04:02.560
+if you don't want to use that model.
+
+04:02.560 --> 04:07.560
+You can select — I'm on Opus 5, not 5.5. Five.
+
+04:09.360 --> 04:11.720
+Five is different from 5.5.
+
+04:11.760 --> 04:13.800
+So brewkeg, these are the only models
+
+04:13.800 --> 04:15.360
+that brewkeg currently supports.
+
+04:15.360 --> 04:17.560
+Note, it's Haiku, Opus 5.
+
+04:17.560 --> 04:19.000
+So Sonnet 5, Opus 5.
+
+04:19.000 --> 04:22.040
+We don't yet have 5.5.
+
+04:22.040 --> 04:24.760
+If you select 5.5 accidentally,
+
+04:24.760 --> 04:28.800
+it's going to route you to Opus 5, right?
+
+04:28.800 --> 04:30.480
+So that is just the whole thing.
+
+04:30.480 --> 04:33.240
+We are yet to get 5.5,
+
+04:33.240 --> 04:35.760
+but it's a little bit difficult for us to get.
+
+04:35.760 --> 04:37.960
+So right now you can just use 5
+
+04:37.960 --> 04:41.400
+and it's going to work — like 90% of your tasks
+
+04:41.400 --> 04:42.680
+is going to do it for you.
+
+04:42.680 --> 04:45.040
+And it's also very, very good.
+
+04:45.920 --> 04:47.200
+I think that's all.
+
+04:47.200 --> 04:48.600
+If you have any questions again,
+
+04:48.600 --> 04:50.800
+let me know in the comment section.
+
+04:50.800 --> 04:52.320
+However you found this video.
