@@ -1,36 +1,29 @@
 {% extends "layouts/public.html" %}
 {% from "components/ui.html" import banner %}
 
-{% block title %}{{ product }} — pay per token in naira{% endblock %}
+{% block title %}{{ product }} — keep the agent, change the provider{% endblock %}
 {% block head %}
-  <meta name="description" content="One key, one naira wallet, every coding model. Requests are metered to the token and every one produces a receipt.">
+  <meta name="description" content="Point Claude Code, Codex or OpenCode at one gateway. Pay per token in naira, with a receipt for every request.">
 {% endblock %}
 
 {% block content %}
+
 <section class="shell hero">
-  <h1 class="hero__title">Keep Claude Code, Codex or OpenCode. Pay per token in naira.</h1>
+  <p class="eyebrow">Tokn Connect — Linux and macOS</p>
+  <h1 class="hero__title">Keep the agent. Change the provider.</h1>
   <p class="hero__lede">
-    One key, one prepaid wallet, every model you already use. The gateway meters what you
-    spend to the token, and every request leaves a receipt you can check.
+    One key points the coding agent you already run at Tokn's gateway. The harness stays
+    yours, the models stay the frontier ones, and you pay per token in naira instead of a
+    monthly quota.
   </p>
   <div class="hero__actions">
     <a class="button button--primary" href="/signup">Get API key</a>
     <a class="button button--quiet" href="#how">How it works</a>
   </div>
-</section>
-
-<section class="shell section" id="how">
-  <div class="section__head">
-    <h2 class="section__title">Connect a client you already have</h2>
-    <p class="section__lede">
-      The gateway speaks the OpenAI and Anthropic protocols. Point a client at it and keep
-      working; the only difference is where the tokens are billed.
-    </p>
-  </div>
 
   <div class="install">
     <div class="install__bar">
-      <span>Base URL and key</span>
+      <span>Point any OpenAI-compatible client at the gateway</span>
       <span class="mono">.env</span>
     </div>
     <pre class="code"><span class="code__prompt">$</span>export OPENAI_BASE_URL=https://{{ domain }}/v1
@@ -38,64 +31,146 @@
   </div>
   <ul class="install__checks">
     <li>Your key, not ours</li>
-    <li>Receipts for every request</li>
-    <li>Hard spend caps per key</li>
+    <li>A receipt for every request</li>
+    <li>A hard cap on every key</li>
   </ul>
-
-  {% if cli_available %}
-    {{ banner("The Tokn CLI is available: tokn setup configures each client and backs up every file it touches.", "info") }}
-  {% else %}
-    {{ banner("The CLI is not published yet. Set the two variables above, or create a key and follow the connect steps in the console.", "info") }}
-  {% endif %}
 </section>
 
-<section class="shell section">
+<section class="shell">
+  <div class="terminal">
+    <div class="terminal__bar">
+      <span class="terminal__dot"></span><span class="terminal__dot"></span><span class="terminal__dot"></span>
+      <span class="terminal__path">example — not a live session</span>
+    </div>
+    <pre class="terminal__body"><span class="prompt">$</span>claude
+<span class="dim">✓ Claude Code → Tokn · gpt-5-codex · claude-sonnet</span>
+
+<span class="dim">&gt;</span> add a clamp(x, lo, hi) helper in lib/math.ts
+
+<span class="dim">·</span> Read lib/math.ts
+<span class="dim">·</span> Edited lib/math.ts <span class="ok">(+18 −0)</span>
+<span class="dim">·</span> Ran npm test -- math
+<span class="ok">✓ 3 passed (3)</span>
+
+<span class="dim">·</span> Added clamp() with three tests. All pass.
+
+<span class="dim">── receipt ──</span>
+<span class="dim">model</span>   claude-sonnet
+<span class="dim">tokens</span>  1,284 in · 612 out · 0 cached
+<span class="dim">cost</span>    ₦2.14
+</pre>
+  </div>
+</section>
+
+<section class="shell section" id="how">
   <div class="section__head">
-    <h2 class="section__title">What a request costs</h2>
+    <h2 class="section__title">Nothing expires.</h2>
     <p class="section__lede">
-      Input, output and cached tokens are priced separately, per model, and the price that
-      applied is written on the receipt. Nothing is rounded in our favour beyond the last
-      micro-naira.
+      A monthly plan sells you a bucket that empties on the first of the month whether you
+      used it or not. Tokn sells you the tokens. Spend them now or next year; they stay
+      yours.
     </p>
   </div>
 
-  <div class="grid grid--three">
-    <div class="card">
-      <h3>Reserved before</h3>
-      <p>The worst case is held from your wallet before the request leaves us. If it does not fit, you get a clear 402 and nothing runs.</p>
+  <div class="bars">
+    <div class="bar-row">
+      <div class="bar-row__head"><span>A monthly plan</span><span class="muted">62% used · gone on the 1st</span></div>
+      <div class="bar-row__track"><div class="bar-row__fill bar-row__fill--spent w-62"></div></div>
     </div>
-    <div class="card">
-      <h3>Measured after</h3>
-      <p>The rest of the hold is released and the real cost is charged, read from the provider's own token counts.</p>
+    <div class="bar-row">
+      <div class="bar-row__head"><span>Tokn</span><span class="muted">62% used · still yours</span></div>
+      <div class="bar-row__track"><div class="bar-row__fill bar-row__fill--kept w-62"></div></div>
     </div>
-    <div class="card">
-      <h3>Recorded always</h3>
-      <p>Model, tokens in, out and cached, cost in naira, latency and outcome. Never the prompt, never the answer.</p>
-    </div>
+  </div>
+  <p class="hint">Illustrative. The numbers are not a forecast of your usage.</p>
+</section>
+
+<section class="shell section">
+  <div class="section__head">
+    <h2 class="section__title">Four families, one key.</h2>
+    <p class="section__lede">
+      The gateway speaks both protocols, so a client that supports a custom base URL works
+      without a plugin. Nothing you already have is replaced.
+    </p>
+  </div>
+
+  <div class="tools">
+    <a class="tool" href="/docs">
+      <div class="tool__head"><span class="tool__mark">CC</span><h3>Claude Code</h3></div>
+      <p>Anthropic protocol, streaming, tool calls.</p>
+      <div class="tool__config">ANTHROPIC_BASE_URL=https://{{ domain }}</div>
+    </a>
+    <a class="tool" href="/docs">
+      <div class="tool__head"><span class="tool__mark">CX</span><h3>Codex CLI</h3></div>
+      <p>OpenAI protocol, streaming.</p>
+      <div class="tool__config">OPENAI_BASE_URL=https://{{ domain }}/v1</div>
+    </a>
+    <a class="tool" href="/docs">
+      <div class="tool__head"><span class="tool__mark">OC</span><h3>OpenCode</h3></div>
+      <p>Any OpenAI-compatible agent.</p>
+      <div class="tool__config">"baseURL": "https://{{ domain }}/v1"</div>
+    </a>
+    <a class="tool" href="/docs">
+      <div class="tool__head"><span class="tool__mark">··</span><h3>Anything else</h3></div>
+      <p>Cline, Roo, Continue, Cursor.</p>
+      <div class="tool__config">https://{{ domain }}/v1</div>
+    </a>
   </div>
 </section>
 
 <section class="shell section">
   <div class="section__head">
-    <h2 class="section__title">Three steps</h2>
+    <h2 class="section__title">Three steps, then just code.</h2>
+    <p class="section__lede">One key, one base URL, and the wiring is done.</p>
   </div>
+
   <div class="step">
     <span class="step__number">01</span>
-    <div><h3>Create a key</h3><p>Sign up, confirm your email, enable two-factor and create a key. The secret is shown once.</p></div>
+    <div>
+      <h3>Create a key</h3>
+      <p>Sign up, confirm your email and enable two-factor. The secret is shown once and stored as a hash.</p>
+    </div>
   </div>
   <div class="step">
     <span class="step__number">02</span>
-    <div><h3>Connect an agent</h3><p>Set the base URL and the key in the client you already use. The console shows the exact lines for each one.</p></div>
+    <div>
+      <h3>Connect</h3>
+      <p>Set the base URL and the key in the client you already use. No plugin, no proxy in the middle, no config rewrite.</p>
+    </div>
   </div>
   <div class="step">
     <span class="step__number">03</span>
-    <div><h3>Work</h3><p>Every request appears in Usage as a receipt with its cost. Top up when the balance runs low.</p></div>
+    <div>
+      <h3>Work</h3>
+      <p>Every request lands in Usage as a receipt with its model, token counts and cost in naira.</p>
+    </div>
   </div>
 </section>
 
 <section class="shell section">
   <div class="section__head">
-    <h2 class="section__title">What we store, and what we do not</h2>
+    <h2 class="section__title">Connected correctly, not just connected.</h2>
+    <p class="section__lede">
+      Pointing an agent at a new provider takes several settings, and a wrong one degrades
+      it quietly. These are the ones that matter.
+    </p>
+  </div>
+
+  <table class="table">
+    <thead><tr><th>Setting</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">OPENAI_BASE_URL</td><td class="mono">https://{{ domain }}/v1</td></tr>
+      <tr><td class="mono">ANTHROPIC_BASE_URL</td><td class="mono">https://{{ domain }}</td></tr>
+      <tr><td class="mono">Authorization</td><td class="mono">Bearer tokn_live_…</td></tr>
+      <tr><td class="mono">model</td><td>The alias from the catalogue, for example <span class="mono">claude-sonnet</span></td></tr>
+      <tr><td class="mono">max_tokens</td><td>Bounded per model; a request above the limit is refused before it runs</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="shell section">
+  <div class="section__head">
+    <h2 class="section__title">What we store, and what we do not.</h2>
   </div>
   <div class="grid grid--two">
     <div class="card">
@@ -103,44 +178,91 @@
       <p>Your account, your keys as hashes, your wallet and ledger, and one receipt per request: model, tokens, cost, latency, outcome.</p>
     </div>
     <div class="card">
-      <h3>We do not store</h3>
-      <p>Prompts, completions, request bodies or authorisation headers. There is no setting to turn this back on, because there is nothing to turn on.</p>
+      <h3>We never store</h3>
+      <p>Prompts, completions, request bodies or authorisation headers. There is no toggle, because there is nothing to toggle.</p>
+    </div>
+  </div>
+</section>
+
+<section class="shell section">
+  <div class="section__head">
+    <h2 class="section__title">Your key stays with you.</h2>
+    <p class="section__lede">
+      A key carries its own limits, and you can end it at any moment without touching
+      anything else.
+    </p>
+  </div>
+  <div class="grid grid--three">
+    <div class="card">
+      <h3>Shown once, stored hashed</h3>
+      <p>The secret exists in the moment you create it. After that the database holds an HMAC digest, so a dump is not a set of keys.</p>
+    </div>
+    <div class="card">
+      <h3>Capped per key</h3>
+      <p>A spend cap and an expiry. When either is reached the key stops; it does not overspend and it does not ask twice.</p>
+    </div>
+    <div class="card">
+      <h3>Revoked immediately</h3>
+      <p>Revocation clears the cache entry first, so the next request fails. Not within a minute — on the next request.</p>
     </div>
   </div>
 </section>
 
 <section class="shell section faq">
   <div class="section__head">
-    <h2 class="section__title">Questions</h2>
+    <h2 class="section__title">Questions, answered.</h2>
   </div>
   <details>
-    <summary>Is this a subscription?</summary>
-    <p>No. You prepay in naira and spend it per token. Credit never expires, and there is no monthly minimum.</p>
+    <summary>Does Tokn change my agent's config?</summary>
+    <p>No. You set a base URL and a key in the client you already use. Nothing is rewritten and nothing is replaced.</p>
+  </details>
+  <details>
+    <summary>Which agents does it work with?</summary>
+    <p>Any client that supports a custom OpenAI or Anthropic base URL: Claude Code, Codex CLI, OpenCode, Cline, Roo, Continue and Cursor. Some product features bypass a custom endpoint entirely; the docs say which.</p>
+  </details>
+  <details>
+    <summary>Where does my key go?</summary>
+    <p>To the gateway you are calling, in the authorisation header of each request. It is never placed in a URL, a log line or a page.</p>
   </details>
   <details>
     <summary>Which models can I use?</summary>
-    <p>The catalogue lists real model names with their input, output and cache prices. If a model is not listed, it is not enabled.</p>
+    <p>Whatever the catalogue enables for your account. The console lists the real model names with their input, output and cache prices.</p>
+  </details>
+  <details>
+    <summary>How much does it cost?</summary>
+    <p>Per token, at the price on the receipt. There is no subscription and no monthly minimum; credit never expires.</p>
   </details>
   <details>
     <summary>What happens if my balance runs out mid-request?</summary>
-    <p>It cannot. The worst case is held before the request starts, so a request either fits or is refused with a 402 before anything runs.</p>
-  </details>
-  <details>
-    <summary>Can I cap what a key spends?</summary>
-    <p>Yes. Each key can carry a spend cap and an expiry. When the cap is reached the key stops working; it does not overspend.</p>
-  </details>
-  <details>
-    <summary>Do you use my prompts to train anything?</summary>
-    <p>No. We do not store them, so there is nothing to train on.</p>
+    <p>It cannot. The worst case is held before the request starts, so it either fits or is refused with a 402 before anything runs.</p>
   </details>
   <details>
     <summary>What if a request fails upstream?</summary>
-    <p>You are not charged. The hold is released in full, and the failed attempt is recorded with an upstream error outcome.</p>
+    <p>You are not charged. The hold is returned in full and the attempt is recorded with an upstream error outcome.</p>
+  </details>
+  <details>
+    <summary>Do you train on my prompts?</summary>
+    <p>No. They are not stored, so there is nothing to train on.</p>
   </details>
 </section>
 
+<section class="shell section">
+  <div class="section__head">
+    <h2 class="section__title">Priced per token, not per month.</h2>
+    <p class="section__lede">
+      Every model carries its own input, output and cache price, and the price that applied
+      is written on the receipt. Top up any amount; it does not lapse.
+    </p>
+  </div>
+  <div class="card">
+      <h3>The catalogue is not published yet</h3>
+      <p>Prices are read from the live catalogue rather than written into this page. Once
+        models are enabled, their real per-million prices appear here and in the console.</p>
+    </div>
+</section>
+
 <section class="shell closing">
-  <h2>Start with one key.</h2>
+  <h2>A key first. Tokens after.</h2>
   <a class="button button--primary" href="/signup">Get API key</a>
 </section>
 {% endblock %}

@@ -1,9 +1,28 @@
-<footer class="footer">
-  <div class="shell footer__links">
-    <a href="/support">Support</a>
-    <a href="/privacy">Privacy</a>
-    <a href="/terms">Terms</a>
-    <a href="/status">Status</a>
-    <a href="mailto:{{ support_email }}">{{ support_email }}</a>
+<footer class="site-footer">
+  <div class="shell site-footer__grid">
+    <div>
+      <a class="nav__wordmark" href="/">{{ product }}</a>
+      <p class="muted">Lagos, Nigeria. Contact: <a href="mailto:{{ support_email }}">{{ support_email }}</a></p>
+    </div>
+    <div>
+      <h4>Product</h4>
+      <ul>
+        <li><a href="/docs">Docs</a></li>
+        <li><a href="/status">Status</a></li>
+        <li><a href="/app">Console</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Company</h4>
+      <ul>
+        <li><a href="/support">Support</a></li>
+        <li><a href="/privacy">Privacy</a></li>
+        <li><a href="/terms">Terms</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="shell site-footer__legal">
+    <span>© 2026 {{ product }}</span>
+    <span>Pay per token. Nothing expires.</span>
   </div>
 </footer>
