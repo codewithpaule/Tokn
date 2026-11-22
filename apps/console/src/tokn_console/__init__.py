@@ -1,7 +1,6 @@
-"""Tokn console: the control plane.
+"""__init__ for the console package.
 
-Accounts, sessions, API keys, billing and admin. Server-rendered HTML only. It never
-proxies model traffic.
+The console now only hosts the site and the theme stylesheet.
 """
 
 from tokn_console.app import create_app

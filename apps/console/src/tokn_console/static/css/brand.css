@@ -1,0 +1,103 @@
+/* Brand bridge.
+   The public pages are the mirrored build; our own pages must look like they belong to
+   the same site. This sheet restates our components in that language, using the values
+   already agreed: blue action, green confirmation, serif headings, pill controls. */
+
+:root {
+  --ink-black: #0e1a24;
+  --blue: #17497f;
+  --blue-deep: #10365e;
+  --font-display: ui-serif, Georgia, "Times New Roman", serif;
+}
+
+/* -- headings ------------------------------------------------------------ */
+
+h1,
+h2,
+.hero__title,
+.section__title {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+h1 { line-height: 1.04; }
+h2 { line-height: 1.1; }
+
+/* -- pills everywhere ---------------------------------------------------- */
+
+.button {
+  border-radius: 9999px;
+  font-weight: 500;
+  letter-spacing: 0.005em;
+}
+
+.button--primary {
+  background: var(--ink-black);
+  border-color: var(--ink-black);
+  color: #ffffff;
+}
+
+.button--primary:hover {
+  background: #000000;
+  border-color: #000000;
+  color: #ffffff;
+}
+
+.button--outline {
+  background: transparent;
+  border-color: #d3dbe4;
+  color: var(--ink-black);
+}
+
+.button--outline:hover {
+  border-color: var(--ink-black);
+}
+
+.button--sm { height: 36px; }
+
+/* -- nav ----------------------------------------------------------------- */
+
+.nav__mark {
+  border-radius: 10px;
+  background: var(--ink-black);
+  color: #ffffff;
+}
+
+.nav__link { font-weight: 400; }
+.nav__link[aria-current="page"] { border-bottom-color: var(--blue); }
+
+.nav__chip { border-radius: 9999px; padding: 2px 10px; }
+
+/* -- surfaces ------------------------------------------------------------ */
+
+.card,
+.auth__card {
+  border-radius: 16px;
+  border-color: #e2e7ee;
+  background: #ffffff;
+}
+
+.install__field,
+.input {
+  border-radius: 10px;
+  border-color: #d3dbe4;
+}
+
+.badge { border-radius: 6px; }
+
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+.button:focus-visible {
+  outline-color: var(--blue);
+}
+
+/* -- links --------------------------------------------------------------- */
+
+a { color: var(--blue); }
+a:hover { color: var(--blue-deep); }
+
+/* -- footer -------------------------------------------------------------- */
+
+.footer { border-top-color: #e2e7ee; }
