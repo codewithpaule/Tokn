@@ -1,0 +1,76 @@
+/* Theme for the served design pages.
+   Their build is Tailwind v4 with theme variables, so overriding the variables is the
+   supported way to re-colour it. No !important, no repainting individual elements. */
+
+@font-face {
+  font-family: "Montserrat";
+  src: url("/static/fonts/montserrat-latin.woff2") format("woff2-variations");
+  font-weight: 400 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* blue carries actions, green is the second voice */
+  --background: #f7f9fc;
+  --foreground: #0e1a24;
+  --card: #ffffff;
+  --card-foreground: #0e1a24;
+  --popover-foreground: #0e1a24;
+  --primary: #17497f;
+  --primary-foreground: #ffffff;
+  --secondary: #eaf0f6;
+  --secondary-foreground: #0e1a24;
+  --muted: #eef2f7;
+  --muted-foreground: #56687a;
+  --accent: #1f6b4a;
+  --accent-foreground: #ffffff;
+  --border: #dbe3ec;
+  --ring: #17497f;
+
+  /* Montserrat everywhere, with the system stack behind it */
+  --font-sans: "Montserrat", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --default-font-family: var(--font-sans);
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* -- scrollbar ----------------------------------------------------------- */
+
+html {
+  scrollbar-width: thin;
+  scrollbar-color: #c3cfdb var(--background);
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--background); }
+::-webkit-scrollbar-thumb {
+  background: #c3cfdb;
+  border-radius: 999px;
+  border: 2px solid var(--background);
+}
+::-webkit-scrollbar-thumb:hover { background: #93a5b8; }
+
+/* -- cursor -------------------------------------------------------------- */
+
+body {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Ccircle cx='10' cy='10' r='4' fill='none' stroke='%2317497F' stroke-width='1.5'/%3E%3C/svg%3E") 10 10, auto;
+}
+
+a, button, summary, label, select,
+[role="button"] {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Ccircle cx='10' cy='10' r='7' fill='%2317497F' fill-opacity='0.14' stroke='%2317497F' stroke-width='1.5'/%3E%3C/svg%3E") 10 10, pointer;
+}
+
+input, textarea {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Cpath d='M10 3v14M3 10h14' stroke='%2317497F' stroke-width='1.5'/%3E%3C/svg%3E") 10 10, text;
+}
+
+@media print {
+  body, a, button, input, textarea { cursor: auto; }
+}

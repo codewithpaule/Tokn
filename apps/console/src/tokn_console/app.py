@@ -6,6 +6,8 @@ production picks PostgreSQL the moment ``TOKN_DATABASE_URL`` is set.
 
 from __future__ import annotations
 
+import pathlib
+import re
 import uuid
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
@@ -14,7 +16,12 @@ from typing import Any
 from urllib.parse import unquote
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import FileResponse, RedirectResponse, Response
+from fastapi.responses import (
+    FileResponse,
+    HTMLResponse,
+    RedirectResponse,
+    Response,
+)
 from sqlalchemy.ext.asyncio import AsyncEngine
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.staticfiles import StaticFiles
@@ -60,10 +67,47 @@ ERROR_COPY = {
 }
 
 
+TRACKERS = (
+    # Google Tag Manager, Meta pixel, their og image service, their search widget.
+    (r'<link rel="preload" href="https://www\.googletagmanager\.com[^>]*>', ""),
+    (r'<script[^>]*googletagmanager[^>]*></script>', ""),
+    (r'<script[^>]*connect\.facebook\.net[^>]*></script>', ""),
+    (r"<noscript><img height=\"1\" width=\"1\"[^>]*facebook\.com/tr[^>]*></noscript>", ""),
+    (r'<link rel="preload" href="https://og\.brewkeg\.dev[^>]*>', ""),
+    (r'<script>\(self\.__next_s=self\.__next_s\|\|\[\]\)\.push\(\[0,\{"children":"!function\(f,b,e,v,n,t,s\)[^<]*</script>', ""),
+)
+
+
+def _strip_trackers(html: str) -> str:
+    """The mirror carries their analytics and ad pixel. Serving those would report our
+    visitors into someone else's accounts and contradict the privacy page."""
+    for pattern, replacement in TRACKERS:
+        html = re.sub(pattern, replacement, html, flags=re.DOTALL)
+    # the cookie banner only exists because of those pixels
+    html = re.sub(r'<aside id="cookie-consent".*?</aside>', "", html, flags=re.DOTALL)
+    return html
+
+
+def _serve_html(path: pathlib.Path) -> HTMLResponse:
+    """Serve a mirrored page with our theme attached and their trackers removed."""
+    html = _strip_trackers(path.read_text(encoding="utf-8", errors="replace"))
+    link = '<link rel="stylesheet" href="/static/css/site-extras.css">'
+    if "</head>" in html:
+        html = html.replace("</head>", f"{link}</head>", 1)
+    return HTMLResponse(html)
+
+
 def _mount_site(app: FastAPI) -> None:
     """Serve the design folder, including the clean URLs it links to."""
     if not SITE.is_dir():
         return
+
+    @app.get("/", include_in_schema=False)
+    async def site_index() -> Response:
+        index = SITE / "index.html"
+        if not index.is_file():
+            raise HTTPException(status_code=404)
+        return _serve_html(index)
 
     @app.get("/_next/image", include_in_schema=False)
     async def next_image(url: str = "") -> Response:
@@ -84,7 +128,7 @@ def _mount_site(app: FastAPI) -> None:
     async def flat_page(page: str) -> Response:
         candidate = SITE / f"{page}.html"
         if candidate.is_file():
-            return FileResponse(candidate, media_type="text/html")
+            return _serve_html(candidate)
         asset = SITE / page
         if asset.is_file():
             return FileResponse(asset)
