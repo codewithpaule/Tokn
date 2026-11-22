@@ -74,7 +74,11 @@ TRACKERS = (
     (r'<script[^>]*connect\.facebook\.net[^>]*></script>', ""),
     (r"<noscript><img height=\"1\" width=\"1\"[^>]*facebook\.com/tr[^>]*></noscript>", ""),
     (r'<link rel="preload" href="https://og\.brewkeg\.dev[^>]*>', ""),
-    (r'<script>\(self\.__next_s=self\.__next_s\|\|\[\]\)\.push\(\[0,\{"children":"!function\(f,b,e,v,n,t,s\)[^<]*</script>', ""),
+    (
+        r'<script>\(self\.__next_s=self\.__next_s\|\|\[\]\)\.push\(\[0,\{"children":'
+        r'"!function\(f,b,e,v,n,t,s\)[^<]*</script>',
+        "",
+    ),
 )
 
 
@@ -84,8 +88,7 @@ def _strip_trackers(html: str) -> str:
     for pattern, replacement in TRACKERS:
         html = re.sub(pattern, replacement, html, flags=re.DOTALL)
     # the cookie banner only exists because of those pixels
-    html = re.sub(r'<aside id="cookie-consent".*?</aside>', "", html, flags=re.DOTALL)
-    return html
+    return re.sub(r'<aside id="cookie-consent".*?</aside>', "", html, flags=re.DOTALL)
 
 
 def _serve_html(path: pathlib.Path) -> HTMLResponse:
