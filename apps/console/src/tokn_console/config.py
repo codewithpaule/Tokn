@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     console_url: str = "http://localhost:8081"
     support_email: str = "support@brewkeg.dev"
     product_name: str = "Brewkeg"
-    key_prefix: str = "tokn"
+    key_prefix: str = "brewkeg"
     key_environment: str = "live"
     domain: str = "brewkeg.dev"
     cli_available: bool = False
@@ -25,10 +25,22 @@ class Settings(BaseSettings):
     key_pepper: str = Field(default="dev-only-pepper-change-me-please")
     secure_cookies: bool = True
     enforce_https: bool = False
+    admin_emails: str = ""
 
     # When set, the console runs on PostgreSQL instead of the in-memory store.
     database_url: str | None = None
     database_pool_size: int = 5
+
+    @property
+    def cookie_secure(self) -> bool:
+        """``__Host-`` cookies need TLS. Development on localhost is plain HTTP."""
+        return self.secure_cookies and self.env != "development"
+
+    @property
+    def administrators(self) -> frozenset[str]:
+        return frozenset(
+            part.strip().lower() for part in self.admin_emails.split(",") if part.strip()
+        )
 
     def validated(self) -> Settings:
         """Fail fast rather than serve auth with a placeholder secret in production."""

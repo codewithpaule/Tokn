@@ -68,6 +68,8 @@ class AuthStore(Protocol):
 
     async def set_recovery_codes(self, account_id: str, digests: tuple[str, ...]) -> None: ...
 
+    async def set_admin(self, account_id: str, value: bool = True) -> None: ...
+
     async def consume_recovery_code(self, account_id: str, digest: str) -> bool:
         """Remove one matching recovery code. True if it was present."""
 

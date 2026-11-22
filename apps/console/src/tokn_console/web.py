@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
+from urllib.parse import urlsplit
 
 from fastapi import HTTPException, Request, Response, status
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
@@ -16,14 +17,14 @@ from starlette.types import ASGIApp
 
 from tokn_core.auth.hashing import digests_match, hash_secret, new_secret
 from tokn_core.auth.ports import Clock
-from tokn_core.auth.sessions import COOKIE_NAME, Session, SessionExpiredError
+from tokn_core.auth.sessions import Session, SessionExpiredError
 from tokn_core.auth.store import AuthStore, SessionRecord
 
 CSRF_COOKIE = "__Host-csrf"
 CSRF_FIELD = "csrf_token"
 
 CONTENT_SECURITY_POLICY = (
-    "default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; "
+    "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; "
     "img-src 'self' data:; connect-src 'self'; form-action 'self'; "
     "frame-ancestors 'none'; base-uri 'none'; object-src 'none'"
 )
@@ -63,6 +64,19 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             return response
         for name, value in SECURITY_HEADERS.items():
             response.headers.setdefault(name, value)
+        nonce = getattr(request.state, "csp_nonce", None)
+        if nonce:
+            # The mirrored design is a static build whose own runtime injects inline
+            # bootstrap scripts. It carries no user input, so its page policy allows
+            # inline script while the console and API keep the strict policy above.
+            response.headers["Content-Security-Policy"] = (
+                "default-src 'none'; "
+                "script-src 'self' 'unsafe-inline'; "
+                "style-src 'self' 'unsafe-inline'; "
+                "font-src 'self'; img-src 'self' data:; connect-src 'self'; "
+                "form-action 'self'; frame-ancestors 'none'; base-uri 'none'; "
+                "object-src 'none'"
+            )
         if self._hsts:
             response.headers.setdefault(
                 "Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload"
@@ -73,16 +87,25 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 class SessionMiddleware(BaseHTTPMiddleware):
     """Load the session for this request, or leave the request anonymous."""
 
-    def __init__(self, app: ASGIApp, *, store: AuthStore, pepper: str, clock: Clock) -> None:
+    def __init__(
+        self, app: ASGIApp, *, store: AuthStore, pepper: str, clock: Clock, cookie_name: str
+    ) -> None:
         super().__init__(app)
         self._store = store
         self._pepper = pepper
         self._clock = clock
+        self._cookie_name = cookie_name
 
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         request.state.session = None
         request.state.session_digest = None
-        raw = request.cookies.get(COOKIE_NAME)
+        path = request.url.path
+        if path.startswith(("/_next", "/static", "/avatars", "/brand", "/images", "/fonts")):
+            # An asset request should not touch a session row. Browsers send cookies for
+            # every same-origin image and script; writing last_seen_at each time would be
+            # a database write per byte served.
+            return await call_next(request)
+        raw = request.cookies.get(self._cookie_name)
         if raw:
             await self._load(request, raw)
         return await call_next(request)
@@ -116,13 +139,15 @@ def client_ip(request: Request) -> str:
     return request.client.host if request.client else "unknown"
 
 
-def ensure_csrf_token(request: Request, response: Response) -> str:
+def ensure_csrf_token(
+    request: Request, response: Response, *, cookie_name: str, secure: bool
+) -> str:
     """Return this browser's CSRF token, minting one into a cookie when absent."""
-    existing = request.cookies.get(CSRF_COOKIE)
+    existing = request.cookies.get(cookie_name)
     if existing:
         return existing
     token = new_secret(32)
-    response.set_cookie(CSRF_COOKIE, token, httponly=True, secure=True, samesite="lax", path="/")
+    response.set_cookie(cookie_name, token, httponly=True, secure=secure, samesite="lax", path="/")
     return token
 
 
@@ -130,6 +155,47 @@ def csrf_matches(cookie: str | None, submitted: str | None) -> bool:
     if not cookie or not submitted:
         return False
     return digests_match(cookie, submitted)
+
+
+async def submitted_csrf(request: Request, *, cookie_name: str) -> bool:
+    """True when a form or JSON body carries the token from this browser's cookie."""
+    cookie = request.cookies.get(cookie_name)
+    if not cookie:
+        return False
+    if not same_origin(request):
+        return False
+    submitted = request.headers.get("x-csrf-token")
+    if submitted is None:
+        content_type = request.headers.get("content-type", "")
+        if "application/json" in content_type:
+            try:
+                payload = await request.json()
+            except ValueError:
+                return False
+            if isinstance(payload, dict):
+                value = payload.get(CSRF_FIELD)
+                submitted = value if isinstance(value, str) else None
+        else:
+            form = await request.form()
+            value = form.get(CSRF_FIELD)
+            submitted = value if isinstance(value, str) else None
+    return csrf_matches(cookie, submitted)
+
+
+def same_origin(request: Request) -> bool:
+    """Refuse a browser request whose Origin is not the host we are serving.
+
+    A missing Origin is allowed: command line clients and older browsers omit it, and the
+    CSRF token still has to match. A present Origin must match the Host header exactly.
+    """
+    origin = request.headers.get("origin")
+    if not origin:
+        referer = request.headers.get("referer")
+        if not referer:
+            return True
+        origin = f"{urlsplit(referer).scheme}://{urlsplit(referer).netloc}"
+    host = request.headers.get("host", "")
+    return urlsplit(origin).netloc == host and urlsplit(origin).scheme == request.url.scheme
 
 
 async def require_csrf(request: Request) -> None:
@@ -141,9 +207,11 @@ async def require_csrf(request: Request) -> None:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="csrf")
 
 
-def set_session_cookie(response: Response, raw: str, *, max_age: int, secure: bool) -> None:
+def set_session_cookie(
+    response: Response, raw: str, *, max_age: int, secure: bool, cookie_name: str
+) -> None:
     response.set_cookie(
-        COOKIE_NAME,
+        cookie_name,
         raw,
         max_age=max_age,
         httponly=True,
@@ -153,8 +221,8 @@ def set_session_cookie(response: Response, raw: str, *, max_age: int, secure: bo
     )
 
 
-def clear_session_cookie(response: Response, *, secure: bool) -> None:
-    response.delete_cookie(COOKIE_NAME, path="/", secure=secure, httponly=True, samesite="lax")
+def clear_session_cookie(response: Response, *, secure: bool, cookie_name: str) -> None:
+    response.delete_cookie(cookie_name, path="/", secure=secure, httponly=True, samesite="lax")
 
 
 class SiteMiddleware(BaseHTTPMiddleware):

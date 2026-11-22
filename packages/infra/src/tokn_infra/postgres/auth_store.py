@@ -91,6 +91,12 @@ class PostgresAuthStore:
                 RecoveryCode(account_id=_uuid(account_id), digest=digest) for digest in digests
             )
 
+    async def set_admin(self, account_id: str, value: bool = True) -> None:
+        async with self._sessions() as session, session.begin():
+            await session.execute(
+                update(Account).where(Account.id == _uuid(account_id)).values(is_admin=value)
+            )
+
     async def consume_recovery_code(self, account_id: str, digest: str) -> bool:
         async with self._sessions() as session, session.begin():
             result = await session.execute(

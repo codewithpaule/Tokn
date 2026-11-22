@@ -129,6 +129,9 @@ class InMemoryAuthStore:
     async def enqueue_email(self, to: str, subject: str, body: str) -> None:
         self.emails.append((to, subject, body))
 
+    async def set_admin(self, account_id: str, value: bool = True) -> None:
+        await self._update(account_id, is_admin=value)
+
     async def make_admin(self, account_id: str, value: bool = True) -> None:
         """Local development and tests only: promote an account."""
         await self._update(account_id, is_admin=value)

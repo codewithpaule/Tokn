@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}{{ title }} · {{ settings.name }}{% endblock %}</title>
+<meta name="description" content="{{ description }}">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/icon-192.png" type="image/png">
+{% block design_css %}{% endblock %}
+<link rel="stylesheet" href="{{ css_console }}">
+<link rel="stylesheet" href="{{ css_site }}">
+<link rel="stylesheet" href="/theme.css">
+<script src="{{ js_console }}" defer></script>
+<script src="{{ js_site }}" defer></script>
+{% block head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+{% block header %}{% include "_site_header.html" %}{% endblock %}
+{% block body %}{% endblock %}
+{% block footer %}{% include "_site_footer.html" %}{% endblock %}
+{% block scripts %}{% endblock %}
+</body>
+</html>

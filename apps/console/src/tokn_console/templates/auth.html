@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block design_css %}
+<link rel="stylesheet" href="/_next/static/chunks/3zpd9_1z14_om.css">
+<link rel="stylesheet" href="/_next/static/chunks/3r8y4op_zsama.css">
+{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+{% block body %}
+<main class="auth-body">
+<section class="auth-panel">
+<p class="auth-kicker">{{ kicker }}</p>
+<h1 class="auth-title">{{ heading }}</h1>
+<p class="auth-lead">{{ lead }}</p>
+{{ content | safe }}
+<p class="auth-foot">{{ foot | safe }}</p>
+</section>
+<aside class="auth-aside">
+<h2>{{ aside_heading }}</h2>
+<p>{{ aside_body }}</p>
+{% if aside_points %}
+<ul class="auth-points">
+{% for head, text in aside_points %}
+<li><span class="dot" aria-hidden="true"></span><span><strong>{{ head }}</strong> {{ text }}</span></li>
+{% endfor %}
+</ul>
+{% endif %}
+</aside>
+</main>
+{% endblock %}

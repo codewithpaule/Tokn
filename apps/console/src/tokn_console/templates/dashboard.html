@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block body_class %}console-page{% endblock %}
+{% block header %}{% endblock %}
+{% block footer %}{% endblock %}
+{% block body %}
+<input class="menu-toggle" type="checkbox" id="menu-toggle" hidden>
+<div class="shell">
+<aside class="sidebar" aria-label="Dashboard">
+<div class="sidebar-head">
+<a class="brand" href="/dashboard">
+<img alt="{{ settings.name }}" width="30" height="30" class="brand-image" src="/_next/icon-transparentd0c4.png">
+<span class="brand-name">{{ settings.name }}</span>
+</a>
+</div>
+<nav class="sidebar-nav">
+{% for label, items in nav %}
+<div class="nav-group">
+{% if label %}<div class="nav-label">{{ label }}</div>{% endif %}
+{% for href, text in items %}
+<a class="nav-item" href="{{ href }}"{% if path == href %} aria-current="page"{% endif %}><span class="dotmark" aria-hidden="true"></span><span>{{ text }}</span></a>
+{% endfor %}
+</div>
+{% endfor %}
+</nav>
+<div class="sidebar-foot">
+<a class="nav-item" href="/dashboard/billing"><span class="dotmark" aria-hidden="true"></span><span>Balance <span class="mono">{{ balance_text }}</span></span></a>
+<div class="who"><span class="avatar" aria-hidden="true">{{ account.email[:1] | upper }}</span>
+<span class="who-email" title="{{ account.email }}">{{ account.email }}</span></div>
+</div>
+</aside>
+<label class="scrim" for="menu-toggle" aria-hidden="true"></label>
+<div class="main">
+<header class="main-bar">
+<div class="bar-left">
+<label class="menu-button" for="menu-toggle" aria-label="Open menu">&#9776;</label>
+<div><div class="eyebrow">{{ eyebrow }}</div><h1>{{ title }}</h1>{% if subtitle %}<p class="muted small subline">{{ subtitle }}</p>{% endif %}</div>
+</div>
+<div class="bar-actions">
+<span class="balance-pill hide-small"><span>Balance</span> {{ balance_text }}</span>
+<a class="btn secondary small hide-small" href="/support">Get help</a>
+<form method="post" action="/api/auth/logout" class="inline-form">
+{{ csrf_field | safe }}
+<button class="btn quiet small" type="submit">Sign out</button>
+</form>
+</div>
+</header>
+<main class="content">{{ content | safe }}</main>
+</div>
+</div>
+{% endblock %}

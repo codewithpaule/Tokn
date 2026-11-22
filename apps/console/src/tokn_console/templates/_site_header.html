@@ -1,0 +1,44 @@
+<header class="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border w-full min-w-0">
+<div class="max-w-7xl mx-auto w-full min-w-0 px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+<div class="flex items-center space-x-4 lg:space-x-8 min-w-0">
+<a class="flex items-center space-x-2.5 group shrink-0" href="/">
+<img alt="{{ settings.name }}" width="30" height="30" decoding="async" class="rounded-md" src="/_next/icon-transparentd0c4.png">
+<span class="font-semibold text-gray-900 tracking-tight text-[15px] whitespace-nowrap">{{ settings.name }}</span>
+</a>
+<nav class="hidden md:flex items-center space-x-6 text-[14px] text-muted-foreground font-medium" aria-label="Site">
+<a class="hover:text-foreground transition" href="/coding">Coding</a>
+<a class="hover:text-foreground transition" href="/pricing">Pricing</a>
+<a class="hover:text-foreground transition" href="/docs">Docs</a>
+<a class="hover:text-foreground transition" href="/support">Support</a>
+<div class="relative">
+<button type="button" aria-haspopup="menu" aria-expanded="false" data-more class="inline-flex items-center gap-1 hover:text-foreground transition">More
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-3 transition-transform" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+</button>
+<div class="more-menu" data-more-menu hidden>
+<div class="more-label">Explore</div>
+<a href="/api">API reference</a>
+<a href="/providers">Providers</a>
+<a href="/compare">Compare models</a>
+<a href="/model-access">Model access</a>
+<a href="/uncensored">Uncensored models</a>
+<a href="/connect">Connect a harness</a>
+<div class="more-label">Product</div>
+<a href="/blog">Blog</a>
+<a href="/coding">Coding agents</a>
+<a href="/status">Status</a>
+</div>
+</div>
+</nav>
+</div>
+<div class="hidden md:flex items-center space-x-3 text-xs font-medium shrink-0">
+{% if account %}
+<a class="text-foreground/80 hover:text-foreground px-2 py-1 font-medium transition whitespace-nowrap" href="/dashboard">{{ account.email }}</a>
+<a class="inline-flex items-center space-x-1 bg-gray-950 text-white px-3.5 py-1.5 rounded-full text-xs font-medium hover:bg-black transition whitespace-nowrap" href="/dashboard"><span>Dashboard</span><span class="text-sm">&rarr;</span></a>
+{% else %}
+<a class="text-foreground/80 hover:text-foreground px-2 py-1 font-medium transition whitespace-nowrap" href="/login">Log in</a>
+<a class="inline-flex items-center space-x-1 bg-gray-950 text-white px-3.5 py-1.5 rounded-full text-xs font-medium hover:bg-black transition whitespace-nowrap" href="/signup"><span>Get API key</span><span class="text-sm">&rarr;</span></a>
+{% endif %}
+</div>
+<a class="md:hidden inline-flex items-center space-x-1 bg-gray-950 text-white px-3.5 py-1.5 rounded-full text-xs font-medium hover:bg-black transition whitespace-nowrap" href="{% if account %}/dashboard{% else %}/signup{% endif %}"><span>{% if account %}Dashboard{% else %}Get API key{% endif %}</span><span class="text-sm">&rarr;</span></a>
+</div>
+</header>

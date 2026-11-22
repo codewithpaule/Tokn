@@ -63,6 +63,12 @@ ignore = ["ANN401"]
 
 [tool.ruff.lint.per-file-ignores]
 "**/tests/**" = ["ANN", "S101", "B008"]
+# These three modules are HTML templates held in Python strings. Wrapping an attribute
+# across lines makes the markup harder to read than a long line does.
+"apps/console/src/tokn_console/auth_routes.py" = ["E501"]
+"apps/console/src/tokn_console/dashboard_routes.py" = ["E501"]
+"apps/console/src/tokn_console/ui.py" = ["E501"]
+"packages/infra/migrations/versions/*.py" = ["E501"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["tokn_core", "tokn_infra", "tokn_gateway", "tokn_console"]

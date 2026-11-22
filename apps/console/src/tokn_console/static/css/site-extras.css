@@ -1,6 +1,8 @@
 /* Theme for the served design pages.
-   Their build is Tailwind v4 with theme variables, so overriding the variables is the
-   supported way to re-colour it. No !important, no repainting individual elements. */
+
+   /theme.css loads first and carries the operator's tokens. This file only spends them:
+   Montserrat everywhere, blue and green instead of the mirror's warm brown, no gradients,
+   and the hand cursor plus slim scrollbar that belong to every page. */
 
 @font-face {
   font-family: "Montserrat";
@@ -10,67 +12,281 @@
   font-display: swap;
 }
 
-:root {
-  /* blue carries actions, green is the second voice */
-  --background: #f7f9fc;
-  --foreground: #0e1a24;
-  --card: #ffffff;
-  --card-foreground: #0e1a24;
-  --popover-foreground: #0e1a24;
-  --primary: #17497f;
-  --primary-foreground: #ffffff;
-  --secondary: #eaf0f6;
-  --secondary-foreground: #0e1a24;
-  --muted: #eef2f7;
-  --muted-foreground: #56687a;
-  --accent: #1f6b4a;
-  --accent-foreground: #ffffff;
-  --border: #dbe3ec;
-  --ring: #17497f;
-
-  /* Montserrat everywhere, with the system stack behind it */
-  --font-sans: "Montserrat", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --default-font-family: var(--font-sans);
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+html,
+body,
+button,
+input,
+select,
+textarea {
+  font-family: var(--font-sans, "Montserrat", system-ui, -apple-system, "Segoe UI", sans-serif) !important;
 }
 
 body {
-  font-family: var(--font-sans);
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--paper, #f7f9fc);
+  color: var(--ink, #0e1a24);
+}
+
+h1, h2, h3, h4, .font-serif, .font-serif-italic {
+  font-family: var(--font-sans, "Montserrat", system-ui, sans-serif) !important;
+  font-style: normal !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.015em;
+}
+
+.font-mono,
+.font-mono *,
+[class*="font-mono"] {
+  font-family: var(--font-sans, "Montserrat", system-ui, sans-serif) !important;
+}
+
+pre, code, kbd, samp {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace !important;
+}
+
+/* -- the mirror's warm palette, moved to ours ---------------------------- */
+
+/* Legacy orange surfaces become the blue highlight. White text keeps the small
+   "Most popular" badges readable after the swap. */
+.bg-\[\#C2703E\],
+.bg-\[\#c2703e\] {
+  background-color: var(--blue) !important;
+  color: #ffffff !important;
+}
+.bg-\[\#C2703E\]\/20,
+.bg-\[\#c2703e\]\/20 {
+  background-color: rgba(23, 73, 127, 0.2) !important;
+}
+.text-\[\#C2703E\],
+.text-\[\#c2703e\] {
+  color: var(--blue) !important;
+}
+.border-\[\#C2703E\],
+.border-\[\#c2703e\] {
+  border-color: var(--blue) !important;
+}
+.bg-\[\#5C3A22\],
+.bg-\[\#5c3a22\] {
+  background-color: var(--blue-deep) !important;
+}
+.text-\[\#5C3A22\],
+.text-\[\#5c3a22\] {
+  color: var(--blue-deep) !important;
+}
+.bg-\[\#EDE3CC\],
+.bg-\[\#ede3cc\],
+.bg-\[\#F1E6D2\],
+.bg-\[\#f1e6d2\],
+.bg-\[\#F6F3EB\],
+.bg-\[\#f6f3eb\] {
+  background-color: #e9eff7 !important;
+}
+.border-\[\#D8C9A8\],
+.border-\[\#d8c9a8\] {
+  border-color: var(--line) !important;
+}
+.bg-\[\#F1E6D2\]\/60 {
+  background-color: rgba(233, 239, 247, 0.6) !important;
+}
+.bg-\[\#F6F3EB\]\/60 {
+  background-color: rgba(233, 239, 247, 0.6) !important;
+}
+.bg-\[\#F6F3EB\]\/80 {
+  background-color: rgba(233, 239, 247, 0.8) !important;
+}
+.bg-\[\#D97757\],
+.bg-\[\#d97757\] {
+  background-color: var(--blue) !important;
+}
+.text-\[\#D97757\],
+.text-\[\#d97757\],
+.text-\[\#E8A46B\],
+.text-\[\#e8a46b\] {
+  color: #ffffff !important;
+}
+
+/* macOS window dots on the terminal cards. Theme tones, not the traffic lights. */
+.bg-\[\#ff5f57\],
+.bg-\[\#FF5F57\] {
+  background-color: var(--blue) !important;
+}
+.bg-\[\#febc2e\],
+.bg-\[\#FEBC2E\] {
+  background-color: #4a7aa7 !important;
+}
+.bg-\[\#28c840\],
+.bg-\[\#28C840\] {
+  background-color: #93a5b8 !important;
+}
+
+/* Auth glow, warm washes and the gradient rule at the top of the auth header. */
+.auth-ambient,
+.auth-glow,
+.auth-drift {
+  display: none !important;
+}
+
+[class*="bg-gradient"] {
+  background-image: none !important;
+}
+
+header .bg-gradient-to-r,
+header [class*="from-\[\#"],
+header [class*="via-\[\#"] {
+  background-color: var(--blue) !important;
+}
+
+/* Their monospace kickers stay readable, but in the product face. */
+.font-serif-italic {
+  text-transform: none !important;
+}
+
+/* -- headline decoration ------------------------------------------------ */
+
+/* Their hand-drawn circle and underline are gone. In their place: a quiet marker
+   highlight on the model name, and a two pixel rule under the product name. */
+.hero-stroke,
+.hero-sweep {
+  display: none !important;
+}
+
+h1 .relative.inline-block {
+  background-image: linear-gradient(
+    180deg,
+    transparent 60%,
+    rgba(23, 73, 127, 0.14) 60%
+  );
+  border-radius: 3px;
+  padding-inline: 2px;
+}
+
+h1 .relative.inline-block:last-of-type {
+  background-image: none;
+  border-bottom: 2px solid var(--green);
+  padding-bottom: 1px;
+}
+
+/* -- the More menu, built by the server ------------------------------- */
+
+.more-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  z-index: 60;
+  min-width: 196px;
+  padding: 7px;
+  background: #ffffff;
+  border: 1px solid var(--border, #dbe3ec);
+  border-radius: 10px;
+  box-shadow: 0 16px 40px rgba(14, 26, 36, 0.12);
+}
+.more-menu[hidden] { display: none; }
+.more-menu a {
+  display: block;
+  padding: 7px 10px;
+  border-radius: 6px;
+  color: var(--foreground, #0e1a24);
+  font-size: 13px;
+  font-weight: 500;
+}
+.more-menu a:hover {
+  background: #eef2f7;
+  text-decoration: none;
+}
+.more-menu .more-label {
+  padding: 5px 10px 3px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8a99a8;
+}
+
+/* -- header fit at tablet widths --------------------------------------- */
+
+/* The design switches the full nav on at 768px, but its own header needs more room than
+   that. Keep the brand, Log in and one call to action, and drop the rest earlier. */
+header a[href="/"] { flex-shrink: 0; }
+header a[href="/"] span { white-space: nowrap; }
+header nav { min-width: 0; }
+
+@media (max-width: 1100px) and (min-width: 901px) {
+  header nav { column-gap: 14px !important; }
+  header nav a,
+  header nav button { font-size: 13px !important; }
+  header .hidden.md\:flex > a { white-space: nowrap; }
+}
+
+@media (max-width: 900px) {
+  header nav { display: none !important; }
+  header .hidden.md\:flex a.bg-gray-950 { display: none !important; }
+  header a.md\:hidden { display: inline-flex !important; }
+  header .hidden.md\:flex { display: flex !important; }
+  header .hidden.md\:flex > a { white-space: nowrap; }
 }
 
 /* -- scrollbar ----------------------------------------------------------- */
 
 html {
   scrollbar-width: thin;
-  scrollbar-color: #c3cfdb var(--background);
+  scrollbar-color: #c3cfdb var(--paper);
 }
 
 ::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-track { background: var(--background); }
+::-webkit-scrollbar-track { background: var(--paper); }
 ::-webkit-scrollbar-thumb {
   background: #c3cfdb;
   border-radius: 999px;
-  border: 2px solid var(--background);
+  border: 2px solid var(--paper);
 }
 ::-webkit-scrollbar-thumb:hover { background: #93a5b8; }
 
 /* -- cursor -------------------------------------------------------------- */
 
-body {
-  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Ccircle cx='10' cy='10' r='4' fill='none' stroke='%2317497F' stroke-width='1.5'/%3E%3C/svg%3E") 10 10, auto;
+/* Two hands, drawn as SVG data URIs so they cost no request. The page rests with an
+   open hand and closes to a pointing hand over anything you can act on. */
+
+:root {
+  --cursor-open: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Cpath d='M9 14V8.2a1.6 1.6 0 0 1 3.2 0V13h1V5.6a1.6 1.6 0 0 1 3.2 0V13h1V7.2a1.6 1.6 0 0 1 3.2 0V14h1V9.4a1.5 1.5 0 0 1 3 0v7.1c0 4.2-2.7 6.9-6.7 6.9h-1.4c-2.1 0-3.6-.9-4.9-2.6l-3.6-5a1.7 1.7 0 0 1 2.4-2.4L9 16.2V14Z' fill='%23ffffff' stroke='%230e1a24' stroke-width='1.4' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --cursor-point: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Cpath d='M11 12V5.6a1.8 1.8 0 0 1 3.6 0V11l4.7 1.3c1.5.4 2.4 1.7 2.4 3.2V19a5 5 0 0 1-5 5h-3.2a5 5 0 0 1-3.8-1.8l-3.4-4.3a1.7 1.7 0 0 1 2.5-2.3L11 18V12Z' fill='%23ffffff' stroke='%230e1a24' stroke-width='1.4' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --cursor-closed: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Cpath d='M8 13.5V10a2 2 0 0 1 4 0v1h1V8.5a2 2 0 0 1 4 0V13h1v-2a2 2 0 0 1 4 0v5c0 3.6-2.5 6-6.2 6h-1.6c-2 0-3.5-.9-4.7-2.5l-3-4a2 2 0 0 1 2.9-2.7L8 15Z' fill='%23ffffff' stroke='%230e1a24' stroke-width='1.4' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
 
-a, button, summary, label, select,
-[role="button"] {
-  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Ccircle cx='10' cy='10' r='7' fill='%2317497F' fill-opacity='0.14' stroke='%2317497F' stroke-width='1.5'/%3E%3C/svg%3E") 10 10, pointer;
+* {
+  cursor: var(--cursor-open) 12 7, default !important;
 }
 
-input, textarea {
-  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Cpath d='M10 3v14M3 10h14' stroke='%2317497F' stroke-width='1.5'/%3E%3C/svg%3E") 10 10, text;
+a,
+button,
+summary,
+label,
+select,
+[role="button"],
+[data-slot="button"],
+[data-more],
+[data-copy],
+input[type="submit"],
+input[type="button"],
+input[type="checkbox"],
+input[type="radio"] {
+  cursor: var(--cursor-point) 11 4, pointer !important;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+textarea {
+  cursor: var(--cursor-point) 11 4, text !important;
+}
+
+a:active,
+button:active,
+[role="button"]:active,
+[data-more]:active,
+[data-copy]:active {
+  cursor: var(--cursor-closed) 11 6, pointer !important;
 }
 
 @media print {
-  body, a, button, input, textarea { cursor: auto; }
+  * { cursor: auto !important; }
 }

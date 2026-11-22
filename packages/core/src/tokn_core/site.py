@@ -27,7 +27,7 @@ class SiteSettings:
     maintenance_message: str = "We are making a change. Back shortly."
 
     name: str = "Brewkeg"
-    mark: str = "T"
+    mark: str = "B"
     tagline: str = "Your coding agent. Paid by the token."
     hero_body: str = (
         "Point the agent you already use at one key. Pay in naira for what you use, see a "
@@ -35,11 +35,11 @@ class SiteSettings:
     )
     support_email: str = "support@brewkeg.dev"
 
-    color_ink: str = "#14110E"
-    color_paper: str = "#FBF9F3"
+    color_ink: str = "#0E1A24"
+    color_paper: str = "#F7F9FC"
     color_accent: str = "#1F6B4A"
     color_accent_deep: str = "#17513A"
-    color_highlight: str = "#C2703E"
+    color_highlight: str = "#17497F"
     font: str = "montserrat"
 
     def validated(self) -> SiteSettings:
@@ -69,7 +69,12 @@ class SiteSettings:
         return FONTS[self.font]
 
     def theme_css(self) -> str:
-        """The subset of tokens the operator controls, as CSS."""
+        """The operator's tokens, written twice.
+
+        The first block is ours (``--ink``, ``--paper``, ``--green``, ``--yellow``).
+        The second maps them onto the token names the mirrored design already uses, so a
+        colour changed in the admin screen reaches every page, including theirs.
+        """
         return (
             "\n".join(
                 (
@@ -80,6 +85,31 @@ class SiteSettings:
                     f"--green-deep:{self.color_accent_deep};",
                     f"--yellow:{self.color_highlight};",
                     f"--font-sans:{self.font_stack()};",
+                    f"--background:{self.color_paper};",
+                    f"--foreground:{self.color_ink};",
+                    "--card:#ffffff;",
+                    f"--card-foreground:{self.color_ink};",
+                    "--popover:#ffffff;",
+                    f"--popover-foreground:{self.color_ink};",
+                    f"--primary:{self.color_highlight};",
+                    "--primary-foreground:#ffffff;",
+                    "--secondary:#eaf0f6;",
+                    f"--secondary-foreground:{self.color_ink};",
+                    "--muted:#eef2f7;",
+                    "--muted-foreground:#56687a;",
+                    f"--accent:{self.color_accent};",
+                    "--accent-foreground:#ffffff;",
+                    "--border:#dbe3ec;",
+                    "--input:#dbe3ec;",
+                    f"--ring:{self.color_highlight};",
+                    "--sidebar:#ffffff;",
+                    f"--sidebar-foreground:{self.color_ink};",
+                    f"--sidebar-primary:{self.color_highlight};",
+                    "--sidebar-primary-foreground:#ffffff;",
+                    f"--sidebar-accent:{self.color_accent};",
+                    "--sidebar-accent-foreground:#ffffff;",
+                    "--sidebar-border:#dbe3ec;",
+                    "--radius:.5rem;",
                     "}",
                 )
             )
